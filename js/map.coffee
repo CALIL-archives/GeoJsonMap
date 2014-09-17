@@ -1,22 +1,33 @@
-# GeoJson on Google Map
-# https://developers.google.com/maps/documentation/javascript/datalayer?hl=ja
-
-# 実行環境 ローカルか？
-isLocal = ->
-  return location.protocol=='file:' or location.port!=''
-
 google.maps.event.addDomListener window, 'load', ->
-  # Mapの初期設定
-  # 中心のlat, lonは今後geojsonから取得できるようにしたい
-  window.map = new google.maps.Map($('#map')[0],
+  window.map = new google.maps.Map(document.getElementById('map-canvas'),
     zoom: 20
+    maxZoom: 28
     center:
       lat: 35.9619654
       lng: 136.1863268
   )
-  
-  # Load a GeoJSON from the same server as our demo.
-  if isLocal()
-    map.data.loadGeoJson '/data/000105.geojson'
-  else
-    map.data.loadGeoJson 'http://lab.calil.jp/haika_store/data/000105.geojson'
+  map.data.loadGeoJson 'http://lab.calil.jp/haika_store/data/000105.geojson'
+  map.data.setStyle (feature) ->
+    type = feature.getProperty("type")
+    if type=='floor'
+      return {
+       fillColor: "#ffffff"
+       fillOpacity : 0.5
+       strokeWeight: 0
+      }
+    else if type=='wall'
+      return {
+       fillColor: "#555555"
+       fillOpacity : 1
+       strokeWeight: 2
+       strokeColor:"#555555"
+       strokeOpacity:1
+      }
+    else
+      return {
+       fillColor: "#aaaaff"
+       fillOpacity : 1
+       strokeWeight: 2
+
+      }
+
