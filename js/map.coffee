@@ -1,5 +1,5 @@
 google.maps.event.addDomListener window, 'load', ->
-  window.map = new google.maps.Map(document.getElementById('map-canvas'),
+  window.map = new google.maps.Map(document.getElementById('map'),
     zoom: 20
     maxZoom: 28
     center:
