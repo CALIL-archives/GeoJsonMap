@@ -10,7 +10,7 @@ styles =
     stroke: new ol.style.Stroke(
       color: "blue"
 #      lineDash: [4]
-      width: 3
+      width: 1
     )
     fill: new ol.style.Fill(color: "rgba(0, 0, 255, 0.1)")
   )]
