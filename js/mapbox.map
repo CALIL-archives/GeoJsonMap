@@ -1,0 +1,10 @@
+{
+  "version": 3,
+  "file": "mapbox.js",
+  "sourceRoot": "",
+  "sources": [
+    "mapbox.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAgDA,IAAA,iBAAA;;AAAA,GAAA,GAAM,CAAC,CAAC,MAAM,CAAC,GAAT,CAAa,KAAb,EAAoB,uBAApB,CACF,CAAC,OADC,CACO,CAAC,UAAD,EAAa,kBAAb,CADP,EACyC,EADzC,CAAN,CAAA;;AAAA,YAOA,GAAe,CAAC,CAAC,MAAM,CAAC,YAAT,CAAA,CACX,CAAC,OADU,CACF,qDADE,CAEX,CAAC,KAFU,CAEJ,GAFI,CAPf,CAAA"
+}
