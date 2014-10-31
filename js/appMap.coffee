@@ -142,9 +142,6 @@ map =
   animateMarker : (goLatLng)->
     # スタート地点をセットする
     @startLatLng = [@userLocation.getPosition().lat(), @userLocation.getPosition().lng()]
-    @transitionMarker(goLatLng)
-
-  transitionMarker : (goLatLng) ->
     @animationCounter = 0
     @animateLatLng = @startLatLng
     # 1コマあたりの移動距離を求める

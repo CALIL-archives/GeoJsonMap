@@ -151,9 +151,6 @@ map = {
   animationLng: void 0,
   animateMarker: function(goLatLng) {
     this.startLatLng = [this.userLocation.getPosition().lat(), this.userLocation.getPosition().lng()];
-    return this.transitionMarker(goLatLng);
-  },
-  transitionMarker: function(goLatLng) {
     this.animationCounter = 0;
     this.animateLatLng = this.startLatLng;
     this.animationLat = (goLatLng[0] - this.startLatLng[0]) / this.drawingNumber;
