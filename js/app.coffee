@@ -25,6 +25,7 @@ app =
         levels = []
         for level, geojson of data.geojson
           levels.push(level)
+        # TODO: いまいる階を指定する
         map.loadFloorByLevel(levels[0])
         map.createLevelMenu(levels.reverse())
       error   : (message)->
@@ -32,19 +33,43 @@ app =
     )
 
 
+## テストコード
 
 # フロアデータの呼び出し、majorを渡す
 app.initGeoJSON(101)
+
+# 地下
+
+time = 0
 setTimeout ->
   map.createUserLocation(164)
-,1000
-
+,time+=1000
 # 現在地の移動
 setTimeout ->
   map.createUserLocation(165)
-,2000
+,time+=1000
 
 # 現在地の移動
 setTimeout ->
   map.createUserLocation(166)
-,3000
+,time+=1000
+
+# 3Fへ移動
+beaconId = 300
+setTimeout ->
+  map.loadFloorAndchangeShelfColor('3F', 299)
+  time = 0
+  setLocation()
+,time+=1000
+
+# 現在地の移動
+setLocation = ()->
+  setTimeout ->
+    beaconId += 10
+    map.createUserLocation(beaconId)
+    if beaconId<385
+      setLocation()
+  , time+=500
+
+
+

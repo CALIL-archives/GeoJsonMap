@@ -54,7 +54,7 @@ map = {
     })(this));
   },
   changeShelfColor: function(shelfId) {
-    return drawGeoJSON(shelfId);
+    return this.drawGeoJSON(shelfId);
   },
   applyStyle: function(feature, shelfId) {
     var id, type;
@@ -95,10 +95,18 @@ map = {
         };
       }
     }
+    if (type === 'beacon') {
+      return {
+        fillColor: "#000000",
+        fillOpacity: 1,
+        strokeWeight: 2,
+        zIndex: 1000
+      };
+    }
   },
-  loadFloorAndShowHighlight: function(level, shelfId) {
-    loadFloorByLevel(level);
-    return changeShelfColor(shelfId);
+  loadFloorAndchangeShelfColor: function(level, shelfId) {
+    this.loadFloorByLevel(level);
+    return this.changeShelfColor(shelfId);
   },
   createUserLocation: function(beaconId) {
     var coordinate, count, feature, lat, lon, markerImage, position, _i, _j, _len, _len1, _ref, _ref1;
@@ -143,7 +151,7 @@ map = {
     return this.userLocation = null;
   },
   drawingNumber: 100,
-  animationTime: 10,
+  animationFrameTime: 10,
   animationCounter: 0,
   startLatLng: void 0,
   animateLatLng: void 0,
@@ -171,7 +179,7 @@ map = {
           return _this.moveMarker();
         };
       })(this));
-      return this.animationTime;
+      return this.animationFrameTime;
     }
   },
   createLevelMenu: function(levelArray) {

@@ -46,7 +46,7 @@ map =
       @applyStyle(feature, shelfId)
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
-    drawGeoJSON(shelfId)
+    @drawGeoJSON(shelfId)
 
   # スタイルを適用する
   applyStyle : (feature, shelfId=0)->
@@ -81,12 +81,19 @@ map =
          fillOpacity : 1
          strokeWeight: 2
         }
-
+    if type=='beacon'
+#      log id
+      return {
+       fillColor: "#000000"
+       fillOpacity : 1
+       strokeWeight: 2
+       zIndex: 1000
+      }
   #・フロアと棚の色を変える (フロア番号・棚ID)
   #　　(アロア切り替えと棚の色を変える処理)
-  loadFloorAndShowHighlight : (level, shelfId)->
-    loadFloorByLevel(level)
-    changeShelfColor(shelfId)
+  loadFloorAndchangeShelfColor : (level, shelfId)->
+    @loadFloorByLevel(level)
+    @changeShelfColor(shelfId)
 
   # 指定した場所に現在地アイコンを表示
   #現在地を描画(minor)
@@ -125,8 +132,8 @@ map =
     @userLocation = null
 
   # マーカーのアニメーション
-  drawingNumber : 100 # 描画回数
-  animationTime : 10 # アニメーション１コマ描画時間
+  drawingNumber : 100 # アニメーションのコマ数
+  animationFrameTime : 10 # アニメーション１コマ描画時間
   animationCounter : 0 # カウンター
   startLatLng: undefined
   animateLatLng: undefined
@@ -153,7 +160,7 @@ map =
       @animationCounter++
       setTimeout =>
         @moveMarker()
-      @animationTime
+      @animationFrameTime
 
   
   # 階層メニューの作成
