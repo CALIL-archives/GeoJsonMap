@@ -24,6 +24,10 @@ log = (obj)->
 map =
   # マップのオブジェクト
   map : null
+  # 現在位置のオブジェクト
+  userLocation: null
+  # geojsonオブジェクト
+  geosjon: null
   init: (divId)->
     @map = new google.maps.Map(document.getElementById(divId),
       disableDefaultUI: true
@@ -40,15 +44,17 @@ map =
     )
   # フロア切り替え
   loadFloorByLevel: (level)->
-    geojson = app.getGeoJSONByLevel(level)
+    # 現在位置の削除
+    @removeUserLocation()
+    @geojson = app.getGeoJSONByLevel(level)
     # レイヤーのオブジェクトを破棄する
     @map.data.forEach (feature)=>
       @map.data.remove feature
     # 地図の中心点を変える
-    latlng = new google.maps.LatLng(geojson.haika.xyLatitude, geojson.haika.xyLongitude)
+    latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
     @map.setCenter(latlng)
     # geojsonを描画する
-    @map.data.addGeoJson(geojson)
+    @map.data.addGeoJson(@geojson)
     @drawGeoJSON()
 
   # geojsonを描画する 
@@ -100,12 +106,66 @@ map =
     changeShelfColor(shelfId)
 
   # 指定した場所に現在地アイコンを表示
-  #・現在地を描画(minor)
-  moveUserLocation: (beaconId)->
-    
-  #・現在地の表示を消す
-  removeUserLocation: ()->
+  #現在地を描画(minor)
+  createUserLocation: (beaconId)->
+    @removeUserLocation()
+    lat = 0
+    lon = 0
+    count = 0
+    for feature in @geojson.features
+      if feature.properties.type=='beacon'
+        if feature.properties.id==beaconId
+          count = feature.geometry.coordinates[0].length
+          for coordinate in feature.geometry.coordinates[0]
+            lat += coordinate[1]
+            lon += coordinate[0]
+    if lat==0 and lon==0
+      return
+    markerImage = new google.maps.MarkerImage('img/marker.png',
+      new google.maps.Size(34, 34),
+      new google.maps.Point(0, 0),
+      new google.maps.Point(17, 17))
+    log lat/count
+    log lon/count
+    position = new google.maps.LatLng(lat/count, lon/count)
+    @userLocation = new google.maps.Marker
+      position: position
+      map: @map
+      icon: markerImage
+    @userLocation.setMap(@map)
 
+  # 現在地の表示を消す
+  removeUserLocation: ()->
+    if @userLocation
+      @userLocation.setMap(null)
+    @userLocation = null
+
+  # マーカーのアニメーション
+  animateMarker : (goLatLng)->
+    drawingNumber = 100 # 描画回数
+    delay = 10 # 描画時間
+    counter = 0 # カウンター
+    lat = undefined
+    lng = undefined
+
+    marker = map.userLocation
+
+    #milliseconds
+    transition = (result) ->
+      counter = 0
+      lat = (goLatLng[0] - animateLatLng[0]) / drawingNumber
+      lng = (goLatLng[1] - animateLatLng[1]) / drawingNumber
+      moveMarker()
+
+    moveMarker = ->
+      animateLatLng[0] += lat
+      animateLatLng[1] += lng
+      marker.setPosition new google.maps.LatLng(animateLatLng[0], animateLatLng[1])
+      if counter!=drawingNumber
+        counter++
+        setTimeout moveMarker, delay
+
+  
   # 階層メニューの作成
   createLevelMenu: (levelArray)->
     $('#map-level').empty()
@@ -124,6 +184,7 @@ app =
   geojsons : {}
   getGeoJSONByLevel: (level)->
     geojson = @geojsons[level]
+    # TODO:中心点を求める処理を入れる
     geojson.haika =
       xyLatitude: 35.1550682
       xyLongitude: 136.9637741
@@ -131,7 +192,7 @@ app =
   loadGeoJSON : (option)->
     $.ajax
       url: """http://lab.calil.jp/haika_store/load.php?major=#{option.major}"""
-      type: 'POST'
+      type: 'GET'
       cache: false
       dataType: 'json'
       error: ()=>
@@ -154,24 +215,18 @@ app =
 
 # フロアデータの呼び出し、majorを渡す
 app.initGeoJSON(101)
+setTimeout ->
+  map.createUserLocation(164)
+,1000
 
-# マーカーの設置
-createMarker = ->
-  markerImage = new google.maps.MarkerImage('img/marker.png',
-    new google.maps.Size(34, 34),
-    new google.maps.Point(0, 0),
-    new google.maps.Point(17, 17))
-  window.marker = new google.maps.Marker
-    position:map.getCenter()
-    map: map
-    icon: markerImage # アイコン画像を指定
-  marker.setMap(map);
-#  marker.setAnimation(google.maps.Animation.BOUNCE);
-#  marker.setMap(null);
-#    draggable: true
-#  google.maps.event.addListener centerMarker, "dragend", =>
-#    log 'centerMarker'
-#    position = centerMarker.getPosition()
+setTimeout ->
+  map.createUserLocation(165)
+,2000
+
+setTimeout ->
+  map.createUserLocation(166)
+,3000
+
 
 # マーカーの移動
 moveMarker = ->
@@ -188,4 +243,32 @@ moveMarker = ->
 #  moveMarker()
 
 
+position = [35.155001527242796, 136.96389599263 ]
 
+accuracy = 100
+delay = 10
+i = 0
+deltaLat = undefined
+deltaLng = undefined
+
+marker = map.userLocation
+
+#milliseconds
+transition = (result) ->
+  i = 0
+  deltaLat = (result[0] - position[0]) / accuracy
+  deltaLng = (result[1] - position[1]) / accuracy
+  moveMarker()
+
+moveMarker = ->
+  position[0] += deltaLat
+  position[1] += deltaLng
+  marker.setPosition new google.maps.LatLng(position[0], position[1])
+  if i!=accuracy
+    i++
+    setTimeout moveMarker, delay
+
+
+animateMarker = ->
+  result = [marker.getPosition().lat(), marker.getPosition().lng()]
+  transition(result)
