@@ -95,14 +95,6 @@ map = {
         };
       }
     }
-    if (type === 'beacon') {
-      return {
-        fillColor: "#000000",
-        fillOpacity: 1,
-        strokeWeight: 2,
-        zIndex: 1000
-      };
-    }
   },
   loadFloorAndchangeShelfColor: function(level, shelfId) {
     this.loadFloorByLevel(level);
