@@ -41,7 +41,15 @@ map = {
     latlng = new google.maps.LatLng(this.geojson.haika.xyLatitude, this.geojson.haika.xyLongitude);
     this.map.setCenter(latlng);
     this.map.data.addGeoJson(this.geojson);
-    return this.drawGeoJSON();
+    this.drawGeoJSON();
+    $('#map-level li').css({
+      'color': '#000000',
+      'background-color': '#FFFFFF'
+    });
+    return $('#map-level li[level="' + level + '"]').css({
+      'color': '#FFFFFF',
+      'background-color': '#00BFFF'
+    });
   },
   drawGeoJSON: function(shelfId) {
     if (shelfId == null) {

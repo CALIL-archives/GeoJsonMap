@@ -39,6 +39,14 @@ map =
     # geojsonを描画する
     @map.data.addGeoJson(@geojson)
     @drawGeoJSON()
+    $('#map-level li').css(
+      'color': '#000000'
+      'background-color': '#FFFFFF'
+    )
+    $('#map-level li[level="'+level+'"]').css(
+      'color': '#FFFFFF'
+      'background-color': '#00BFFF'
+    )
 
   # geojsonを描画する 
   drawGeoJSON : (shelfId=0)->

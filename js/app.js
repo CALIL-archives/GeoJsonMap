@@ -35,7 +35,7 @@ app = {
       major: major,
       success: (function(_this) {
         return function(data) {
-          var geojson, level, levels, _ref;
+          var geojson, lev, level, levels, _ref;
           _this.geojsons = data.geojson;
           levels = [];
           _ref = data.geojson;
@@ -43,8 +43,9 @@ app = {
             geojson = _ref[level];
             levels.push(level);
           }
-          map.loadFloorByLevel(levels[0]);
-          return map.createLevelMenu(levels.reverse());
+          lev = levels[0];
+          map.createLevelMenu(levels.reverse());
+          return map.loadFloorByLevel(lev);
         };
       })(this),
       error: function(message) {
