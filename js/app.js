@@ -74,7 +74,7 @@ setTimeout(function() {
 beaconId = 300;
 
 setTimeout(function() {
-  map.loadFloorAndchangeShelfColor('3F', 299);
+  map.loadFloorAndchangeShelfColor('3F', 298);
   time = 0;
   return setLocation();
 }, time += 1000);

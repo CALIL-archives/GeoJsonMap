@@ -58,7 +58,7 @@ setTimeout ->
 # 3Fへ移動
 beaconId = 300
 setTimeout ->
-  map.loadFloorAndchangeShelfColor('3F', 299)
+  map.loadFloorAndchangeShelfColor('3F', 298)
   time = 0
   setLocation()
 ,time+=1000

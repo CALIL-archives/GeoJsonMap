@@ -55,6 +55,7 @@ map = {
     if (shelfId == null) {
       shelfId = 0;
     }
+    this.map.data.revertStyle();
     return this.map.data.setStyle((function(_this) {
       return function(feature) {
         return _this.applyStyle(feature, shelfId);

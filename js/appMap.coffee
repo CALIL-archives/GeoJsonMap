@@ -50,6 +50,7 @@ map =
 
   # geojsonを描画する 
   drawGeoJSON : (shelfId=0)->
+    @map.data.revertStyle()
     @map.data.setStyle (feature) =>
       @applyStyle(feature, shelfId)
   # 棚の色を変える (棚ID)
