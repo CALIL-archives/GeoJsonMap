@@ -82,22 +82,21 @@ map =
         return {
          fillColor: "#ff0000"
          fillOpacity : 1
-         strokeWeight: 3
+         strokeWeight: 1
         }
       else
         return {
          fillColor: "#aaaaff"
          fillOpacity : 1
-         strokeWeight: 2
+         strokeWeight: 1
         }
-#    if type=='beacon'
-##      log id
-#      return {
-#       fillColor: "#000000"
-#       fillOpacity : 1
-#       strokeWeight: 2
-#       zIndex: 1000
-#      }
+    if type=='beacon'
+      return {
+       fillColor: "#000000"
+       fillOpacity : 0
+       strokeWeight: 0
+       zIndex: 1000
+      }
   #・フロアと棚の色を変える (フロア番号・棚ID)
   #　　(アロア切り替えと棚の色を変える処理)
   loadFloorAndchangeShelfColor : (level, shelfId)->

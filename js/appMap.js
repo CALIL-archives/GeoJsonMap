@@ -94,15 +94,23 @@ map = {
         return {
           fillColor: "#ff0000",
           fillOpacity: 1,
-          strokeWeight: 3
+          strokeWeight: 1
         };
       } else {
         return {
           fillColor: "#aaaaff",
           fillOpacity: 1,
-          strokeWeight: 2
+          strokeWeight: 1
         };
       }
+    }
+    if (type === 'beacon') {
+      return {
+        fillColor: "#000000",
+        fillOpacity: 0,
+        strokeWeight: 0,
+        zIndex: 1000
+      };
     }
   },
   loadFloorAndchangeShelfColor: function(level, shelfId) {
