@@ -68,6 +68,7 @@ setLocation = ()->
   setTimeout ->
     beaconId += 10
     map.createUserLocation(beaconId)
+    map.changeShelfColor(beaconId-100)
     if beaconId<385
       setLocation()
   , time+=500

@@ -17,7 +17,7 @@ map = {
     }
     return this.map = new google.maps.Map(document.getElementById(divId), {
       disableDefaultUI: true,
-      zoom: 19,
+      zoom: 20,
       maxZoom: 32,
       center: {
         lat: 0,
