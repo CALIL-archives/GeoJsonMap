@@ -40,7 +40,7 @@ map = {
     })(this));
     latlng = new google.maps.LatLng(this.geojson.haika.xyLatitude, this.geojson.haika.xyLongitude);
     this.map.setCenter(latlng);
-    this.map.data.addGeoJson(this.geojson);
+    this.map.data.addGeoJson(this.removeBeaconFromGeoJSON(this.geojson));
     this.drawGeoJSON();
     $('#map-level li').css({
       'color': '#000000',
@@ -50,6 +50,21 @@ map = {
       'color': '#FFFFFF',
       'background-color': '#00BFFF'
     });
+  },
+  removeBeaconFromGeoJSON: function(geojson) {
+    var feature, newGeoJSON, _i, _len, _ref;
+    newGeoJSON = {
+      type: "FeatureCollection",
+      features: []
+    };
+    _ref = geojson.features;
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      feature = _ref[_i];
+      if (feature.properties.type !== 'beacon') {
+        newGeoJSON.features.push(feature);
+      }
+    }
+    return newGeoJSON;
   },
   drawGeoJSON: function(shelfId) {
     if (shelfId == null) {
@@ -103,14 +118,6 @@ map = {
           strokeWeight: 1
         };
       }
-    }
-    if (type === 'beacon') {
-      return {
-        fillColor: "#000000",
-        fillOpacity: 0,
-        strokeWeight: 0,
-        zIndex: 1000
-      };
     }
   },
   loadFloorAndchangeShelfColor: function(level, shelfId) {

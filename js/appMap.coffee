@@ -37,7 +37,7 @@ map =
     latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
     @map.setCenter(latlng)
     # geojsonを描画する
-    @map.data.addGeoJson(@geojson)
+    @map.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
     @drawGeoJSON()
     $('#map-level li').css(
       'color': '#000000'
@@ -47,7 +47,17 @@ map =
       'color': '#FFFFFF'
       'background-color': '#00BFFF'
     )
-
+  # geojsonからビーコンを除く
+  removeBeaconFromGeoJSON : (geojson)->
+    newGeoJSON = {
+      type: "FeatureCollection",
+      features : []
+    }
+    for feature in geojson.features
+      if feature.properties.type!='beacon'
+        newGeoJSON.features.push(feature)
+    return newGeoJSON
+  
   # geojsonを描画する 
   drawGeoJSON : (shelfId=0)->
     @map.data.revertStyle()
@@ -90,13 +100,13 @@ map =
          fillOpacity : 1
          strokeWeight: 1
         }
-    if type=='beacon'
-      return {
-       fillColor: "#000000"
-       fillOpacity : 0
-       strokeWeight: 0
-       zIndex: 1000
-      }
+#    if type=='beacon'
+#      return {
+#       fillColor: "#000000"
+#       fillOpacity : 0
+#       strokeWeight: 0
+#       zIndex: 1000
+#      }
   #・フロアと棚の色を変える (フロア番号・棚ID)
   #　　(アロア切り替えと棚の色を変える処理)
   loadFloorAndchangeShelfColor : (level, shelfId)->
