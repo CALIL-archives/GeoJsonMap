@@ -39,14 +39,6 @@ map =
     # geojsonを描画する
     @map.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
     @drawGeoJSON()
-    $('#map-level li').css(
-      'color': '#000000'
-      'background-color': '#FFFFFF'
-    )
-    $('#map-level li[level="'+level+'"]').css(
-      'color': '#FFFFFF'
-      'background-color': '#00BFFF'
-    )
   # geojsonからビーコンを除く
   removeBeaconFromGeoJSON : (geojson)->
     newGeoJSON = {
@@ -185,5 +177,24 @@ map =
       $('#map-level').append("""<li level="#{level}">#{level}</li>""")
     # 押した時のイベント設定
     $('#map-level li').mousedown ->
-      # thisが必要なのでmapと書く
-      map.loadFloorByLevel($(this).attr('level'))
+      level = $(this).attr('level')
+      # 逐次実行
+      dfd = $.Deferred();
+      dfd.then(->
+        # ボタンの背景色を変える
+        $('#map-level li').css(
+          'color': '#000000'
+          'background-color': '#FFFFFF'
+        )
+        $('#map-level li[level="'+level+'"]').css(
+          'color': '#FFFFFF'
+          'background-color': '#00BFFF'
+        )
+        return
+      ).then(->
+        # thisが必要なのでmapと書く
+        map.loadFloorByLevel(level)
+        return
+      )
+      dfd.resolve()
+      return

@@ -41,15 +41,7 @@ map = {
     latlng = new google.maps.LatLng(this.geojson.haika.xyLatitude, this.geojson.haika.xyLongitude);
     this.map.setCenter(latlng);
     this.map.data.addGeoJson(this.removeBeaconFromGeoJSON(this.geojson));
-    this.drawGeoJSON();
-    $('#map-level li').css({
-      'color': '#000000',
-      'background-color': '#FFFFFF'
-    });
-    return $('#map-level li[level="' + level + '"]').css({
-      'color': '#FFFFFF',
-      'background-color': '#00BFFF'
-    });
+    return this.drawGeoJSON();
   },
   removeBeaconFromGeoJSON: function(geojson) {
     var feature, newGeoJSON, _i, _len, _ref;
@@ -203,7 +195,22 @@ map = {
       $('#map-level').append("<li level=\"" + level + "\">" + level + "</li>");
     }
     return $('#map-level li').mousedown(function() {
-      return map.loadFloorByLevel($(this).attr('level'));
+      var dfd;
+      level = $(this).attr('level');
+      dfd = $.Deferred();
+      dfd.then(function() {
+        $('#map-level li').css({
+          'color': '#000000',
+          'background-color': '#FFFFFF'
+        });
+        $('#map-level li[level="' + level + '"]').css({
+          'color': '#FFFFFF',
+          'background-color': '#00BFFF'
+        });
+      }).then(function() {
+        map.loadFloorByLevel(level);
+      });
+      dfd.resolve();
     });
   }
 };
