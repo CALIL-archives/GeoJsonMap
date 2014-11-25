@@ -43,35 +43,39 @@ app.initGeoJSON(101)
 
 time = 0
 setTimeout ->
-  map.createUserLocation(164)
-,time+=1000
+  map.createUserLocation(164, 'marker-infowindow')
+,time+=2000
 # 現在地の移動
 setTimeout ->
   map.createUserLocation(165)
-,time+=1000
+,time+=2000
 
 # 現在地の移動
 setTimeout ->
   map.createUserLocation(166)
-,time+=1000
+,time+=2000
 
 # 3Fへ移動
 beaconId = 300
 setTimeout ->
   map.loadFloorAndchangeShelfColor('3F', 298)
+  map.createUserLocation(298, 'marker')
+  map.createDestLocation(298, 'destination-infowindow')
+
   time = 0
   setLocation()
-,time+=1000
+,time+=2000
 
 # 現在地の移動
 setLocation = ()->
   setTimeout ->
     beaconId += 10
-    map.createUserLocation(beaconId)
+    map.createUserLocation(beaconId, 'marker')
+    map.createDestLocation(beaconId-100, 'destination-infowindow')
     map.changeShelfColor(beaconId-100)
-    if beaconId<385
+    if beaconId<365
       setLocation()
-  , time+=500
+  , time+=1000
 
 
 

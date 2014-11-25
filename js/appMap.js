@@ -10,6 +10,7 @@ log = function(obj) {
 map = {
   map: null,
   userLocation: null,
+  destLocation: null,
   geosjon: null,
   createMap: function(divId) {
     if (divId == null) {
@@ -31,7 +32,8 @@ map = {
     if (!this.map) {
       this.createMap();
     }
-    this.removeUserLocation();
+    this.userLocation = this.removeMarker(this.userLocation);
+    this.destLocation = this.removeMarker(this.destLocation);
     this.geojson = app.getGeoJSONByLevel(level);
     this.map.data.forEach((function(_this) {
       return function(feature) {
@@ -99,13 +101,13 @@ map = {
     if (type === 'shelf') {
       if (id === shelfId) {
         return {
-          fillColor: "#ff0000",
+          fillColor: "#FE0703",
           fillOpacity: 1,
           strokeWeight: 1
         };
       } else {
         return {
-          fillColor: "#aaaaff",
+          fillColor: "#CEE1F2",
           fillOpacity: 1,
           strokeWeight: 1
         };
@@ -116,56 +118,112 @@ map = {
     this.loadFloorByLevel(level);
     return this.changeShelfColor(shelfId);
   },
-  createUserLocation: function(beaconId) {
-    var coordinate, count, feature, lat, lon, markerImage, position, _i, _j, _len, _len1, _ref, _ref1;
+  getObjectCenterLatLng: function(objectId) {
+    var coordinate, count, feature, lat, lng, _i, _j, _len, _len1, _ref, _ref1;
     lat = 0;
-    lon = 0;
+    lng = 0;
     count = 0;
     _ref = this.geojson.features;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       feature = _ref[_i];
-      if (feature.properties.type === 'beacon') {
-        if (feature.properties.id === beaconId) {
-          count = feature.geometry.coordinates[0].length;
-          _ref1 = feature.geometry.coordinates[0];
-          for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-            coordinate = _ref1[_j];
-            lat += coordinate[1];
-            lon += coordinate[0];
-          }
+      if (feature.properties.id === objectId) {
+        count = feature.geometry.coordinates[0].length;
+        _ref1 = feature.geometry.coordinates[0];
+        for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+          coordinate = _ref1[_j];
+          lat += coordinate[1];
+          lng += coordinate[0];
         }
       }
     }
-    if (lat === 0 && lon === 0) {
-      return;
+    return {
+      'lat': lat / count,
+      'lng': lng / count
+    };
+  },
+  createUserLocation: function(beaconId, markerType) {
+    var objectCenter;
+    if (markerType == null) {
+      markerType = 'marker';
     }
-    markerImage = new google.maps.MarkerImage('img/marker.png', new google.maps.Size(34, 34), new google.maps.Point(0, 0), new google.maps.Point(17, 17));
-    position = new google.maps.LatLng(lat / count, lon / count);
     if (this.userLocation) {
-      this.animateMarker([lat / count, lon / count]);
+      objectCenter = this.getObjectCenterLatLng(beaconId);
+      if (objectCenter.lat === 0 && objectCenter.lng === 0) {
+        return;
+      }
+      this.animateMarker([objectCenter.lat, objectCenter.lng]);
     } else {
-      this.userLocation = new google.maps.Marker({
-        position: position,
-        map: this.map,
-        icon: markerImage
-      });
+      this.userLocation = this.createMarker(beaconId, markerType);
     }
-    return this.userLocation.setMap(this.map);
-  },
-  removeUserLocation: function() {
     if (this.userLocation) {
-      this.userLocation.setMap(null);
+      return this.userLocation.setMap(this.map);
     }
-    return this.userLocation = null;
   },
-  drawingNumber: 100,
-  animationFrameTime: 10,
+  createDestLocation: function(shelfId, markerType) {
+    if (markerType == null) {
+      markerType = 'destination';
+    }
+    this.destLocation = this.removeMarker(this.destLocation);
+    this.destLocation = this.createMarker(shelfId, markerType);
+    if (this.destLocation) {
+      return this.destLocation.setMap(this.map);
+    }
+  },
+  iconMarker: function() {
+    return new google.maps.MarkerImage('img/marker.png', new google.maps.Size(34, 34), new google.maps.Point(0, 0), new google.maps.Point(17, 17));
+  },
+  iconMarkerWindow: function() {
+    return new google.maps.MarkerImage('img/marker-infowindow.png', new google.maps.Size(73, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 68));
+  },
+  iconDest: function() {
+    return new google.maps.MarkerImage('img/destination.png', new google.maps.Size(23, 30), new google.maps.Point(0, 0), new google.maps.Point(11, 30));
+  },
+  iconDestWindow: function() {
+    return new google.maps.MarkerImage('img/destination-infowindow.png', new google.maps.Size(74, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 85));
+  },
+  getIcon: function(markerType) {
+    if (markerType === 'marker') {
+      return this.iconMarker();
+    }
+    if (markerType === 'marker-infowindow') {
+      return this.iconMarkerWindow();
+    }
+    if (markerType === 'destination') {
+      return this.iconDest();
+    }
+    if (markerType === 'destination-infowindow') {
+      return this.iconDestWindow();
+    }
+  },
+  createMarker: function(objectId, markerType) {
+    var marker, objectCenter, position;
+    objectCenter = this.getObjectCenterLatLng(objectId);
+    position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng);
+    marker = new google.maps.Marker({
+      position: position,
+      map: this.map,
+      icon: this.getIcon(markerType)
+    });
+    return marker;
+  },
+  changeMarkerIcon: function(marker, markerType) {
+    return marker.setIcon(this.getIcon(markerType));
+  },
+  removeMarker: function(marker) {
+    if (marker) {
+      marker.setMap(null);
+    }
+    return null;
+  },
+  drawingNumber: 50,
+  animationFrameTime: 7,
   animationCounter: 0,
   startLatLng: void 0,
   animateLatLng: void 0,
   animationLat: void 0,
   animationLng: void 0,
   animateMarker: function(goLatLng) {
+    this.changeMarkerIcon(this.userLocation, 'marker');
     this.startLatLng = [this.userLocation.getPosition().lat(), this.userLocation.getPosition().lng()];
     this.animationCounter = 0;
     this.animateLatLng = this.startLatLng;
@@ -174,17 +232,21 @@ map = {
     return this.moveMarker();
   },
   moveMarker: function() {
+    if (!this.userLocation) {
+      return;
+    }
     this.animateLatLng[0] += this.animationLat;
     this.animateLatLng[1] += this.animationLng;
     this.userLocation.setPosition(new google.maps.LatLng(this.animateLatLng[0], this.animateLatLng[1]));
-    if (this.animationCounter !== this.drawingNumber) {
+    if (this.animationCounter === this.drawingNumber) {
+      return this.changeMarkerIcon(this.userLocation, 'marker-infowindow');
+    } else {
       this.animationCounter++;
-      setTimeout((function(_this) {
+      return setTimeout((function(_this) {
         return function() {
           return _this.moveMarker();
         };
-      })(this));
-      return this.animationFrameTime;
+      })(this), this.animationFrameTime);
     }
   },
   createLevelMenu: function(levelArray) {

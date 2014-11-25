@@ -60,34 +60,37 @@ app.initGeoJSON(101);
 time = 0;
 
 setTimeout(function() {
-  return map.createUserLocation(164);
-}, time += 1000);
+  return map.createUserLocation(164, 'marker-infowindow');
+}, time += 2000);
 
 setTimeout(function() {
   return map.createUserLocation(165);
-}, time += 1000);
+}, time += 2000);
 
 setTimeout(function() {
   return map.createUserLocation(166);
-}, time += 1000);
+}, time += 2000);
 
 beaconId = 300;
 
 setTimeout(function() {
   map.loadFloorAndchangeShelfColor('3F', 298);
+  map.createUserLocation(298, 'marker');
+  map.createDestLocation(298, 'destination-infowindow');
   time = 0;
   return setLocation();
-}, time += 1000);
+}, time += 2000);
 
 setLocation = function() {
   return setTimeout(function() {
     beaconId += 10;
-    map.createUserLocation(beaconId);
+    map.createUserLocation(beaconId, 'marker');
+    map.createDestLocation(beaconId - 100, 'destination-infowindow');
     map.changeShelfColor(beaconId - 100);
-    if (beaconId < 385) {
+    if (beaconId < 365) {
       return setLocation();
     }
-  }, time += 500);
+  }, time += 1000);
 };
 
 /*
