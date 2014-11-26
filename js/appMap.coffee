@@ -4,7 +4,7 @@ log = (obj)->
 
 map =
   # マップのオブジェクト
-  map : null
+  googleMaps : null
   # ユーザーの現在地のオブジェクト
   userLocation: null
   # 目的地のオブジェクト
@@ -12,10 +12,10 @@ map =
   # geojsonオブジェクト
   geosjon: null
   createMap: (divId='map')->
-    @map = new google.maps.Map(document.getElementById(divId),
+    @googleMaps = new google.maps.Map(document.getElementById(divId),
       disableDefaultUI: true
-      zoom: 20
-      maxZoom: 32
+      zoom: 19
+      maxZoom: 38
       center:
         lat: 0
         lng: 0
@@ -40,20 +40,20 @@ map =
         'background-color': '#00BFFF'
       )
     ).then(=>
-      if not @map
+      if not @googleMaps
         @createMap()
       # マーカーの削除
       @userLocation = @removeMarker(@userLocation)
       @destLocation = @removeMarker(@destLocation)
       @geojson = app.getGeoJSONByLevel(level)
       # レイヤーのオブジェクトを破棄する
-      @map.data.forEach (feature)=>
-        @map.data.remove feature
+      @googleMaps.data.forEach (feature)=>
+        @googleMaps.data.remove feature
       # 地図の中心点を変える
       latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
-      @map.setCenter(latlng)
+      @googleMaps.setCenter(latlng)
       # geojsonを描画する
-      @map.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
+      @googleMaps.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
       @drawGeoJSON()
     )
     dfd.resolve()
@@ -70,8 +70,8 @@ map =
   
   # geojsonを描画する 
   drawGeoJSON : (shelfId=0)->
-    @map.data.revertStyle()
-    @map.data.setStyle (feature) =>
+    @googleMaps.data.revertStyle()
+    @googleMaps.data.setStyle (feature) =>
       @applyStyle(feature, shelfId)
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
@@ -135,19 +135,24 @@ map =
         for coordinate in feature.geometry.coordinates[0]
           lat += coordinate[1]
           lng += coordinate[0]
-    return {'lat': lat/count, 'lng': lng/count}
+    if lat==0 and lng==0
+      return null
+    else
+      return {'lat': lat/count, 'lng': lng/count}
   # 指定した場所に現在地アイコンを表示
   # 現在地を描画(minor)
   createUserLocation: (beaconId, markerType='marker')->
     if @userLocation
       objectCenter = @getObjectCenterLatLng(beaconId)
-      if objectCenter.lat==0 and objectCenter.lng==0
+      if not objectCenter
+        # マーカーの削除
+        @userLocation = @removeMarker(@userLocation)
         return
       @animateMarker([objectCenter.lat, objectCenter.lng])
     else
       @userLocation = @createMarker(beaconId, markerType)
     if @userLocation
-      @userLocation.setMap(@map)
+      @userLocation.setMap(@googleMaps)
  
   # 指定した棚に目的地アイコンを表示
   # 目的地を描画(minor)
@@ -155,7 +160,7 @@ map =
     @destLocation = @removeMarker(@destLocation)
     @destLocation = @createMarker(shelfId, markerType)
     if @destLocation
-      @destLocation.setMap(@map)
+      @destLocation.setMap(@googleMaps)
 
   iconMarker : ->
     new google.maps.MarkerImage('img/marker.png',
@@ -190,10 +195,12 @@ map =
   # マーカーの作成
   createMarker: (objectId, markerType)->
     objectCenter = @getObjectCenterLatLng(objectId)
+    if not objectCenter
+      return
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng)
     marker =  new google.maps.Marker
       position: position
-      map: @map
+      map: @googleMaps
       icon: @getIcon(markerType)
     return marker
   
@@ -207,6 +214,11 @@ map =
     if marker
       marker.setMap(null)
     return null
+  
+  # 現在地を消す
+  removeUserLocation: ()->
+    if @userLocation
+      @userLocation = @removeMarker(@userLocation)
 
   # マーカーのアニメーション
   drawingNumber : 50 # アニメーションのコマ数
@@ -217,6 +229,8 @@ map =
   animationLat : undefined
   animationLng : undefined
   animateMarker : (goLatLng)->
+    if not @userLocation
+      return
     # マーカーの吹き出しを消す
     @changeMarkerIcon(@userLocation, 'marker')
     # スタート地点をセットする

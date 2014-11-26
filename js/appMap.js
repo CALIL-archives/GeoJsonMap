@@ -8,7 +8,7 @@ log = function(obj) {
 };
 
 map = {
-  map: null,
+  googleMaps: null,
   userLocation: null,
   destLocation: null,
   geosjon: null,
@@ -16,10 +16,10 @@ map = {
     if (divId == null) {
       divId = 'map';
     }
-    return this.map = new google.maps.Map(document.getElementById(divId), {
+    return this.googleMaps = new google.maps.Map(document.getElementById(divId), {
       disableDefaultUI: true,
-      zoom: 20,
-      maxZoom: 32,
+      zoom: 19,
+      maxZoom: 38,
       center: {
         lat: 0,
         lng: 0
@@ -42,18 +42,18 @@ map = {
     }).then((function(_this) {
       return function() {
         var latlng;
-        if (!_this.map) {
+        if (!_this.googleMaps) {
           _this.createMap();
         }
         _this.userLocation = _this.removeMarker(_this.userLocation);
         _this.destLocation = _this.removeMarker(_this.destLocation);
         _this.geojson = app.getGeoJSONByLevel(level);
-        _this.map.data.forEach(function(feature) {
-          return _this.map.data.remove(feature);
+        _this.googleMaps.data.forEach(function(feature) {
+          return _this.googleMaps.data.remove(feature);
         });
         latlng = new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude);
-        _this.map.setCenter(latlng);
-        _this.map.data.addGeoJson(_this.removeBeaconFromGeoJSON(_this.geojson));
+        _this.googleMaps.setCenter(latlng);
+        _this.googleMaps.data.addGeoJson(_this.removeBeaconFromGeoJSON(_this.geojson));
         return _this.drawGeoJSON();
       };
     })(this));
@@ -78,8 +78,8 @@ map = {
     if (shelfId == null) {
       shelfId = 0;
     }
-    this.map.data.revertStyle();
-    return this.map.data.setStyle((function(_this) {
+    this.googleMaps.data.revertStyle();
+    return this.googleMaps.data.setStyle((function(_this) {
       return function(feature) {
         return _this.applyStyle(feature, shelfId);
       };
@@ -150,10 +150,14 @@ map = {
         }
       }
     }
-    return {
-      'lat': lat / count,
-      'lng': lng / count
-    };
+    if (lat === 0 && lng === 0) {
+      return null;
+    } else {
+      return {
+        'lat': lat / count,
+        'lng': lng / count
+      };
+    }
   },
   createUserLocation: function(beaconId, markerType) {
     var objectCenter;
@@ -162,7 +166,8 @@ map = {
     }
     if (this.userLocation) {
       objectCenter = this.getObjectCenterLatLng(beaconId);
-      if (objectCenter.lat === 0 && objectCenter.lng === 0) {
+      if (!objectCenter) {
+        this.userLocation = this.removeMarker(this.userLocation);
         return;
       }
       this.animateMarker([objectCenter.lat, objectCenter.lng]);
@@ -170,7 +175,7 @@ map = {
       this.userLocation = this.createMarker(beaconId, markerType);
     }
     if (this.userLocation) {
-      return this.userLocation.setMap(this.map);
+      return this.userLocation.setMap(this.googleMaps);
     }
   },
   createDestLocation: function(shelfId, markerType) {
@@ -180,7 +185,7 @@ map = {
     this.destLocation = this.removeMarker(this.destLocation);
     this.destLocation = this.createMarker(shelfId, markerType);
     if (this.destLocation) {
-      return this.destLocation.setMap(this.map);
+      return this.destLocation.setMap(this.googleMaps);
     }
   },
   iconMarker: function() {
@@ -212,10 +217,13 @@ map = {
   createMarker: function(objectId, markerType) {
     var marker, objectCenter, position;
     objectCenter = this.getObjectCenterLatLng(objectId);
+    if (!objectCenter) {
+      return;
+    }
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng);
     marker = new google.maps.Marker({
       position: position,
-      map: this.map,
+      map: this.googleMaps,
       icon: this.getIcon(markerType)
     });
     return marker;
@@ -229,6 +237,11 @@ map = {
     }
     return null;
   },
+  removeUserLocation: function() {
+    if (this.userLocation) {
+      return this.userLocation = this.removeMarker(this.userLocation);
+    }
+  },
   drawingNumber: 50,
   animationFrameTime: 7,
   animationCounter: 0,
@@ -237,6 +250,9 @@ map = {
   animationLat: void 0,
   animationLng: void 0,
   animateMarker: function(goLatLng) {
+    if (!this.userLocation) {
+      return;
+    }
     this.changeMarkerIcon(this.userLocation, 'marker');
     this.startLatLng = [this.userLocation.getPosition().lat(), this.userLocation.getPosition().lng()];
     this.animationCounter = 0;

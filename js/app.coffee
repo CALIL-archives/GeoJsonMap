@@ -73,7 +73,7 @@ setLocation = ()->
     map.createUserLocation(beaconId, 'marker')
     map.createDestLocation(beaconId-100, 'destination-infowindow')
     map.changeShelfColor(beaconId-100)
-    if beaconId<365
+    if beaconId<385
       setLocation()
   , time+=1000
 
