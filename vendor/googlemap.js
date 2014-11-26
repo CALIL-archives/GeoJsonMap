@@ -21,9 +21,6 @@ map = {
     if (zoom == null) {
       zoom = 20;
     }
-    if (this.googleMaps != null) {
-      return;
-    }
     options = {
       zoom: zoom,
       maxZoom: 38,
@@ -34,6 +31,9 @@ map = {
     };
     this.googleMaps = new google.maps.Map(document.getElementById(divId), options);
     this.initDeferred.resolve().promise();
+  },
+  isInitialized: function() {
+    return this.googleMaps != null;
   },
   deferred: function(process) {
     var d;
@@ -47,42 +47,44 @@ map = {
     return d.promise();
   },
   loadFloorByLevel: function(level) {
-    var dfd, geoJsonWithoutBeacon, start_time;
-    this.initialize();
+    var dfd, func, start_time;
     start_time = new Date();
     dfd = new $.Deferred();
-    geoJsonWithoutBeacon = null;
-    $.when(this.deferred((function(_this) {
+    log(level);
+    func = (function(_this) {
       return function() {
-        $('#map-level > li').css({
-          'color': '#000000',
-          'background-color': '#FFFFFF'
+        var geoJsonWithoutBeacon;
+        geoJsonWithoutBeacon = null;
+        $.when(_this.deferred(function() {
+          $('#map-level > li').css({
+            'color': '#000000',
+            'background-color': '#FFFFFF'
+          });
+          return $("#map-level > li[level='" + level + "']").css({
+            'color': '#FFFFFF',
+            'background-color': '#00BFFF'
+          });
+        }), _this.deferred(function() {
+          _this.removeUserLocation();
+          return _this.googleMaps.data.forEach(function(feature) {
+            return _this.googleMaps.data.remove(feature);
+          });
+        }), _this.deferred(function() {
+          _this.geojson = app.getGeoJSONByLevel(level);
+          return geoJsonWithoutBeacon = _this.removeBeaconFromGeoJSON(_this.geojson);
+        })).done(function() {
+          _this.googleMaps.setCenter(new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude));
+          _this.googleMaps.data.addGeoJson(geoJsonWithoutBeacon);
+          _this.applyStyle();
+          dfd.resolve();
         });
-        return $("#map-level > li[level='" + level + "']").css({
-          'color': '#FFFFFF',
-          'background-color': '#00BFFF'
-        });
       };
-    })(this)), this.deferred((function(_this) {
-      return function() {
-        _this.removeUserLocation();
-        return _this.googleMaps.data.forEach(function(feature) {
-          return _this.googleMaps.data.remove(feature);
-        });
-      };
-    })(this)), this.deferred((function(_this) {
-      return function() {
-        _this.geojson = app.getGeoJSONByLevel(level);
-        return geoJsonWithoutBeacon = _this.removeBeaconFromGeoJSON(_this.geojson);
-      };
-    })(this))).done((function(_this) {
-      return function() {
-        _this.googleMaps.setCenter(new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude));
-        _this.googleMaps.data.addGeoJson(geoJsonWithoutBeacon);
-        _this.applyStyle();
-        dfd.resolve();
-      };
-    })(this));
+    })(this);
+    if (this.isInitialized()) {
+      func();
+    } else {
+      this.initDeferred.done(func);
+    }
     return dfd.promise();
   },
   removeBeaconFromGeoJSON: function(geojson) {
