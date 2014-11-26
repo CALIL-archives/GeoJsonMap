@@ -39,8 +39,8 @@ map =
 
   # フロア切り替え
   loadFloorByLevel: (level, shelfId=0)->
-    @createMap()
     start_time = new Date()
+    @createMap()
     geoJsonWithoutBeacon = null
     $.when(
       @deferred(=>
@@ -200,7 +200,6 @@ map =
   # マーカーの作成
   createMarker: (objectId, markerType)->
     objectCenter = @getObjectCenterLatLng(objectId)
-    # 地図が切り替わった直後のケースに対応する
     if not objectCenter
       return null
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng)

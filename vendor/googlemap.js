@@ -51,8 +51,8 @@ map = {
     if (shelfId == null) {
       shelfId = 0;
     }
-    this.createMap();
     start_time = new Date();
+    this.createMap();
     geoJsonWithoutBeacon = null;
     return $.when(this.deferred((function(_this) {
       return function() {
