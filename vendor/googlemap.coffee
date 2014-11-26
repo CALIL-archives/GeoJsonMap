@@ -12,7 +12,7 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  initialize: (divId='map-canvas', zoom=20)->
+  createMap: (divId='map-canvas', zoom=20)->
     if @googleMaps?
       return
     options = {
@@ -38,10 +38,9 @@ map =
     return d.promise()
 
   # フロア切り替え
-  loadFloorByLevel: (level)->
-    @initialize()
+  loadFloorByLevel: (level, shelfId=0)->
+    @createMap()
     start_time = new Date()
-    dfd = new $.Deferred()
     geoJsonWithoutBeacon = null
     $.when(
       @deferred(=>
@@ -62,11 +61,9 @@ map =
       # 新マップの描画
       @googleMaps.setCenter(new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude))
       @googleMaps.data.addGeoJson(geoJsonWithoutBeacon)
-      @applyStyle()
-      dfd.resolve()
+      @applyStyle(shelfId)
       return
     )
-    return dfd.promise()
 
   # geojsonからビーコンを除く
   removeBeaconFromGeoJSON : (geojson)->
@@ -81,9 +78,7 @@ map =
   
   # フロアと棚の色を変える (フロア番号・棚ID)
   loadFloorAndChangeShelfColor: (level, shelfId)->
-    return @loadFloorByLevel(level).done(=>
-      @changeShelfColor(shelfId)
-    )
+    @loadFloorByLevel(level, shelfId)
 
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
@@ -204,8 +199,9 @@ map =
   # マーカーの作成
   createMarker: (objectId, markerType)->
     objectCenter = @getObjectCenterLatLng(objectId)
+    # 地図が切り替わった直後のケースに対応する
     if not objectCenter
-      return
+      return null
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng)
     marker =  new google.maps.Marker
       position: position
