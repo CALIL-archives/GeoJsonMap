@@ -59,14 +59,26 @@ app.initGeoJSON(101);
 
 time = 0;
 
+setTimeout(function() {
+  return map.createUserLocation(164, 'marker-infowindow');
+}, time += 2000);
+
+setTimeout(function() {
+  return map.createUserLocation(165);
+}, time += 2000);
+
+setTimeout(function() {
+  return map.createUserLocation(166);
+}, time += 2000);
+
 beaconId = 300;
 
 setTimeout(function() {
-  map.loadFloorAndChangeShelfColor('3F', 298).then(function() {
-    map.createUserLocation(298, 'marker');
-    return map.createDestLocation(298, 'destination-infowindow');
-  });
-  return time = 0;
+  map.loadFloorAndChangeShelfColor('3F', 298);
+  map.createUserLocation(298, 'marker');
+  map.createDestLocation(298, 'destination-infowindow');
+  time = 0;
+  return setLocation();
 }, time += 2000);
 
 setLocation = function() {
