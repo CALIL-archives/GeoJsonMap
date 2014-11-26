@@ -13,6 +13,8 @@ map =
   geosjon: null
   initDeferred: new $.Deferred
   initialize: (divId='map-canvas', zoom=20)->
+    if @googleMaps?
+      return
     options = {
       zoom: zoom
       maxZoom: 38
@@ -24,9 +26,8 @@ map =
     @googleMaps = new google.maps.Map(document.getElementById(divId), options)
     @initDeferred.resolve().promise() # 初期化完了を通知
     return
-  isInitialized: ->
-    return @googleMaps?
-   # 処理の非同期化
+  
+  # 処理の非同期化
   deferred: (process)->
     d = new $.Deferred()
     setTimeout(->
@@ -38,39 +39,33 @@ map =
 
   # フロア切り替え
   loadFloorByLevel: (level)->
+    @initialize()
     start_time = new Date()
     dfd = new $.Deferred()
-    log level
-    func = =>
-      geoJsonWithoutBeacon = null
-      $.when(
-        @deferred(=>
-          # ボタンへ反映
-          $('#map-level > li').css({'color': '#000000', 'background-color': '#FFFFFF'})
-          $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
-        ),@deferred(=>
-          # 古いマップの削除
-          @removeUserLocation()
-          @googleMaps.data.forEach (feature)=>
-            @googleMaps.data.remove feature
-        ),@deferred(=>
-          # 取得
-          @geojson = app.getGeoJSONByLevel(level)
-          geoJsonWithoutBeacon = @removeBeaconFromGeoJSON(@geojson)
-        )
-      ).done(=>
-        # 新マップの描画
-        @googleMaps.setCenter(new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude))
-        @googleMaps.data.addGeoJson(geoJsonWithoutBeacon)
-        @applyStyle()
-        dfd.resolve()
-        return
+    geoJsonWithoutBeacon = null
+    $.when(
+      @deferred(=>
+        # ボタンへ反映
+        $('#map-level > li').css({'color': '#000000', 'background-color': '#FFFFFF'})
+        $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
+      ),@deferred(=>
+        # 古いマップの削除
+        @removeUserLocation()
+        @googleMaps.data.forEach (feature)=>
+          @googleMaps.data.remove feature
+      ),@deferred(=>
+        # 取得
+        @geojson = app.getGeoJSONByLevel(level)
+        geoJsonWithoutBeacon = @removeBeaconFromGeoJSON(@geojson)
       )
+    ).done(=>
+      # 新マップの描画
+      @googleMaps.setCenter(new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude))
+      @googleMaps.data.addGeoJson(geoJsonWithoutBeacon)
+      @applyStyle()
+      dfd.resolve()
       return
-    if @isInitialized()
-      func()
-    else
-      @initDeferred.done(func)
+    )
     return dfd.promise()
 
   # geojsonからビーコンを除く
