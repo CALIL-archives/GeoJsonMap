@@ -44,7 +44,6 @@ app = {
             levels.push(level);
           }
           lev = levels[0];
-          map.initialize();
           map.createLevelMenu(levels.reverse());
           return map.loadFloorByLevel(lev);
         };

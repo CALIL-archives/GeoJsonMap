@@ -26,7 +26,6 @@ app =
         for level, geojson of data.geojson
           levels.push(level)
         lev = levels[0]
-        map.initialize()
         map.createLevelMenu(levels.reverse())
         # TODO: いまいる階を指定する
         map.loadFloorByLevel(lev)
