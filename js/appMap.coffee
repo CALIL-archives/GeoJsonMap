@@ -27,21 +27,36 @@ map =
     )
   # フロア切り替え
   loadFloorByLevel: (level)->
-    if not @map
-      @createMap()
-    # マーカーの削除
-    @userLocation = @removeMarker(@userLocation)
-    @destLocation = @removeMarker(@destLocation)
-    @geojson = app.getGeoJSONByLevel(level)
-    # レイヤーのオブジェクトを破棄する
-    @map.data.forEach (feature)=>
-      @map.data.remove feature
-    # 地図の中心点を変える
-    latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
-    @map.setCenter(latlng)
-    # geojsonを描画する
-    @map.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
-    @drawGeoJSON()
+    # 逐次実行
+    dfd = $.Deferred();
+    dfd.then(->
+      # ボタンの背景色を変える
+      $('#map-level li').css(
+        'color': '#000000'
+        'background-color': '#FFFFFF'
+      )
+      $('#map-level li[level="'+level+'"]').css(
+        'color': '#FFFFFF'
+        'background-color': '#00BFFF'
+      )
+    ).then(=>
+      if not @map
+        @createMap()
+      # マーカーの削除
+      @userLocation = @removeMarker(@userLocation)
+      @destLocation = @removeMarker(@destLocation)
+      @geojson = app.getGeoJSONByLevel(level)
+      # レイヤーのオブジェクトを破棄する
+      @map.data.forEach (feature)=>
+        @map.data.remove feature
+      # 地図の中心点を変える
+      latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
+      @map.setCenter(latlng)
+      # geojsonを描画する
+      @map.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
+      @drawGeoJSON()
+    )
+    dfd.resolve()
   # geojsonからビーコンを除く
   removeBeaconFromGeoJSON : (geojson)->
     newGeoJSON = {
@@ -237,23 +252,5 @@ map =
     # 押した時のイベント設定
     $('#map-level li').mousedown ->
       level = $(this).attr('level')
-      # 逐次実行
-      dfd = $.Deferred();
-      dfd.then(->
-        # ボタンの背景色を変える
-        $('#map-level li').css(
-          'color': '#000000'
-          'background-color': '#FFFFFF'
-        )
-        $('#map-level li[level="'+level+'"]').css(
-          'color': '#FFFFFF'
-          'background-color': '#00BFFF'
-        )
-        return
-      ).then(->
-        # thisが必要なのでmapと書く
-        map.loadFloorByLevel(level)
-        return
-      )
-      dfd.resolve()
-      return
+      # thisが必要なのでmapと書く
+      map.loadFloorByLevel(level)

@@ -28,22 +28,36 @@ map = {
     });
   },
   loadFloorByLevel: function(level) {
-    var latlng;
-    if (!this.map) {
-      this.createMap();
-    }
-    this.userLocation = this.removeMarker(this.userLocation);
-    this.destLocation = this.removeMarker(this.destLocation);
-    this.geojson = app.getGeoJSONByLevel(level);
-    this.map.data.forEach((function(_this) {
-      return function(feature) {
-        return _this.map.data.remove(feature);
+    var dfd;
+    dfd = $.Deferred();
+    dfd.then(function() {
+      $('#map-level li').css({
+        'color': '#000000',
+        'background-color': '#FFFFFF'
+      });
+      return $('#map-level li[level="' + level + '"]').css({
+        'color': '#FFFFFF',
+        'background-color': '#00BFFF'
+      });
+    }).then((function(_this) {
+      return function() {
+        var latlng;
+        if (!_this.map) {
+          _this.createMap();
+        }
+        _this.userLocation = _this.removeMarker(_this.userLocation);
+        _this.destLocation = _this.removeMarker(_this.destLocation);
+        _this.geojson = app.getGeoJSONByLevel(level);
+        _this.map.data.forEach(function(feature) {
+          return _this.map.data.remove(feature);
+        });
+        latlng = new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude);
+        _this.map.setCenter(latlng);
+        _this.map.data.addGeoJson(_this.removeBeaconFromGeoJSON(_this.geojson));
+        return _this.drawGeoJSON();
       };
     })(this));
-    latlng = new google.maps.LatLng(this.geojson.haika.xyLatitude, this.geojson.haika.xyLongitude);
-    this.map.setCenter(latlng);
-    this.map.data.addGeoJson(this.removeBeaconFromGeoJSON(this.geojson));
-    return this.drawGeoJSON();
+    return dfd.resolve();
   },
   removeBeaconFromGeoJSON: function(geojson) {
     var feature, newGeoJSON, _i, _len, _ref;
@@ -257,22 +271,8 @@ map = {
       $('#map-level').append("<li level=\"" + level + "\">" + level + "</li>");
     }
     return $('#map-level li').mousedown(function() {
-      var dfd;
       level = $(this).attr('level');
-      dfd = $.Deferred();
-      dfd.then(function() {
-        $('#map-level li').css({
-          'color': '#000000',
-          'background-color': '#FFFFFF'
-        });
-        $('#map-level li[level="' + level + '"]').css({
-          'color': '#FFFFFF',
-          'background-color': '#00BFFF'
-        });
-      }).then(function() {
-        map.loadFloorByLevel(level);
-      });
-      dfd.resolve();
+      return map.loadFloorByLevel(level);
     });
   }
 };
