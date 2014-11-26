@@ -49,7 +49,8 @@ map =
         $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
       ),@deferred(=>
         # 古いマップの削除
-        @removeUserLocation()
+        @userLocation = @removeMarker(@userLocation)
+        @destLocation = @removeMarker(@destLocation)
         @googleMaps.data.forEach (feature)=>
           @googleMaps.data.remove feature
       ),@deferred(=>

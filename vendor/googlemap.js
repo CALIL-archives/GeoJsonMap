@@ -67,7 +67,8 @@ map = {
       };
     })(this)), this.deferred((function(_this) {
       return function() {
-        _this.removeUserLocation();
+        _this.userLocation = _this.removeMarker(_this.userLocation);
+        _this.destLocation = _this.removeMarker(_this.destLocation);
         return _this.googleMaps.data.forEach(function(feature) {
           return _this.googleMaps.data.remove(feature);
         });
