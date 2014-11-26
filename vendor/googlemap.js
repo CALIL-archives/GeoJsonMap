@@ -13,7 +13,7 @@ map = {
   destLocation: null,
   geosjon: null,
   initDeferred: new $.Deferred,
-  initialize: function(divId, zoom) {
+  createMap: function(divId, zoom) {
     var options;
     if (divId == null) {
       divId = 'map-canvas';
@@ -46,13 +46,15 @@ map = {
     }, 0);
     return d.promise();
   },
-  loadFloorByLevel: function(level) {
-    var dfd, geoJsonWithoutBeacon, start_time;
-    this.initialize();
+  loadFloorByLevel: function(level, shelfId) {
+    var geoJsonWithoutBeacon, start_time;
+    if (shelfId == null) {
+      shelfId = 0;
+    }
+    this.createMap();
     start_time = new Date();
-    dfd = new $.Deferred();
     geoJsonWithoutBeacon = null;
-    $.when(this.deferred((function(_this) {
+    return $.when(this.deferred((function(_this) {
       return function() {
         $('#map-level > li').css({
           'color': '#000000',
@@ -79,11 +81,9 @@ map = {
       return function() {
         _this.googleMaps.setCenter(new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude));
         _this.googleMaps.data.addGeoJson(geoJsonWithoutBeacon);
-        _this.applyStyle();
-        dfd.resolve();
+        _this.applyStyle(shelfId);
       };
     })(this));
-    return dfd.promise();
   },
   removeBeaconFromGeoJSON: function(geojson) {
     var feature, newGeoJSON, _i, _len, _ref;
@@ -101,11 +101,7 @@ map = {
     return newGeoJSON;
   },
   loadFloorAndChangeShelfColor: function(level, shelfId) {
-    return this.loadFloorByLevel(level).done((function(_this) {
-      return function() {
-        return _this.changeShelfColor(shelfId);
-      };
-    })(this));
+    return this.loadFloorByLevel(level, shelfId);
   },
   changeShelfColor: function(shelfId) {
     return this.applyStyle(shelfId);
@@ -241,7 +237,7 @@ map = {
     var marker, objectCenter, position;
     objectCenter = this.getObjectCenterLatLng(objectId);
     if (!objectCenter) {
-      return;
+      return null;
     }
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng);
     marker = new google.maps.Marker({
