@@ -11,52 +11,68 @@ map =
   destLocation: null
   # geojsonオブジェクト
   geosjon: null
-  createMap: (divId='map')->
-    @googleMaps = new google.maps.Map(document.getElementById(divId),
-      disableDefaultUI: true
-      zoom: 19
+  initDeferred: new $.Deferred
+  initialize: (divId='map-canvas', zoom=20)->
+    options = {
+      zoom: zoom
       maxZoom: 38
-      center:
-        lat: 0
-        lng: 0
-      scaleControl: false,
-  #    panControl: false
-  #    zoomControl: false
-  #    streetViewControl: false
-  #    mapTypeControl: false 
-    )
+      center: new google.maps.LatLng(-34.397, 150.644)
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+      disableDefaultUI: true
+      scaleControl: false
+    }
+    @googleMaps = new google.maps.Map(document.getElementById(divId), options)
+    @initDeferred.resolve().promise() # 初期化完了を通知
+    return
+  isInitialized: ->
+    return @googleMaps?
+   # 処理の非同期化
+  deferred: (process)->
+    d = new $.Deferred()
+    setTimeout(->
+      process?()
+      d.resolve()
+      return
+    , 0)
+    return d.promise()
+
   # フロア切り替え
   loadFloorByLevel: (level)->
-    # 逐次実行
-    dfd = $.Deferred();
-    dfd.then(->
-      # ボタンの背景色を変える
-      $('#map-level li').css(
-        'color': '#000000'
-        'background-color': '#FFFFFF'
+    start_time = new Date()
+    dfd = new $.Deferred()
+    log level
+    func = =>
+      geoJsonWithoutBeacon = null
+      $.when(
+        @deferred(=>
+          # ボタンへ反映
+          $('#map-level > li').css({'color': '#000000', 'background-color': '#FFFFFF'})
+          $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
+        ),@deferred(=>
+          # 古いマップの削除
+          @removeUserLocation()
+          @googleMaps.data.forEach (feature)=>
+            @googleMaps.data.remove feature
+        ),@deferred(=>
+          # 取得
+          @geojson = app.getGeoJSONByLevel(level)
+          geoJsonWithoutBeacon = @removeBeaconFromGeoJSON(@geojson)
+        )
+      ).done(=>
+        # 新マップの描画
+        @googleMaps.setCenter(new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude))
+        @googleMaps.data.addGeoJson(geoJsonWithoutBeacon)
+        @applyStyle()
+        dfd.resolve()
+        return
       )
-      $('#map-level li[level="'+level+'"]').css(
-        'color': '#FFFFFF'
-        'background-color': '#00BFFF'
-      )
-    ).then(=>
-      if not @googleMaps
-        @createMap()
-      # マーカーの削除
-      @userLocation = @removeMarker(@userLocation)
-      @destLocation = @removeMarker(@destLocation)
-      @geojson = app.getGeoJSONByLevel(level)
-      # レイヤーのオブジェクトを破棄する
-      @googleMaps.data.forEach (feature)=>
-        @googleMaps.data.remove feature
-      # 地図の中心点を変える
-      latlng = new google.maps.LatLng(@geojson.haika.xyLatitude, @geojson.haika.xyLongitude)
-      @googleMaps.setCenter(latlng)
-      # geojsonを描画する
-      @googleMaps.data.addGeoJson(@removeBeaconFromGeoJSON(@geojson))
-      @drawGeoJSON()
-    )
-    dfd.resolve()
+      return
+    if @isInitialized()
+      func()
+    else
+      @initDeferred.done(func)
+    return dfd.promise()
+
   # geojsonからビーコンを除く
   removeBeaconFromGeoJSON : (geojson)->
     newGeoJSON = {
@@ -68,60 +84,58 @@ map =
         newGeoJSON.features.push(feature)
     return newGeoJSON
   
-  # geojsonを描画する 
-  drawGeoJSON : (shelfId=0)->
-    @googleMaps.data.revertStyle()
-    @googleMaps.data.setStyle (feature) =>
-      @applyStyle(feature, shelfId)
+  # フロアと棚の色を変える (フロア番号・棚ID)
+  loadFloorAndChangeShelfColor: (level, shelfId)->
+    return @loadFloorByLevel(level).done(=>
+      @changeShelfColor(shelfId)
+    )
+
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
-    @drawGeoJSON(shelfId)
+    @applyStyle(shelfId)
 
   # スタイルを適用する
-  applyStyle : (feature, shelfId=0)->
-    id   = feature.getProperty("id")
-    type = feature.getProperty("type")
-    if type=='floor'
-      return {
-       fillColor: "#ffffff"
-       fillOpacity : 0.5
-       strokeWeight: 0
-       zIndex: -1
-      }
-    if type=='wall'
-      return {
-       fillColor: "#555555"
-       fillOpacity : 1
-       strokeWeight: 2
-       strokeColor:"#555555"
-       strokeOpacity:1
-      }
-    if type=='shelf'
-      # 目的の棚だったらスタイルを変える
-      if id==shelfId
+  applyStyle : (shelfId=0)->
+    @googleMaps.data.revertStyle()
+    @googleMaps.data.setStyle (feature)=>
+      type = feature.getProperty("type")
+      id   = feature.getProperty("id")
+      if type=='floor'
         return {
-         fillColor: "#FE0703"
-         fillOpacity : 1
-         strokeWeight: 1
+         fillColor: "#ffffff"
+         fillOpacity : 0.5
+         strokeWeight: 0
+         zIndex: -1
         }
-      else
+      if type=='wall'
         return {
-         fillColor: "#CEE1F2"
+         fillColor: "#555555"
          fillOpacity : 1
-         strokeWeight: 1
+         strokeWeight: 2
+         strokeColor:"#555555"
+         strokeOpacity:1
         }
-#    if type=='beacon'
-#      return {
-#       fillColor: "#000000"
-#       fillOpacity : 0
-#       strokeWeight: 0
-#       zIndex: 1000
-#      }
-  #・フロアと棚の色を変える (フロア番号・棚ID)
-  #　　(アロア切り替えと棚の色を変える処理)
-  loadFloorAndchangeShelfColor : (level, shelfId)->
-    @loadFloorByLevel(level)
-    @changeShelfColor(shelfId)
+      if type=='shelf'
+        # 目的の棚だったらスタイルを変える
+        if id==shelfId
+          return {
+           fillColor: "#FE0703"
+           fillOpacity : 1
+           strokeWeight: 1
+          }
+        else
+          return {
+           fillColor: "#CEE1F2"
+           fillOpacity : 1
+           strokeWeight: 1
+          }
+  #    if type=='beacon'
+  #      return {
+  #       fillColor: "#000000"
+  #       fillOpacity : 0
+  #       strokeWeight: 0
+  #       zIndex: 1000
+  #      }
 
   # オブジェクトの中心点を求める
   getObjectCenterLatLng: (objectId)->

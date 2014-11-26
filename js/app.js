@@ -44,6 +44,7 @@ app = {
             levels.push(level);
           }
           lev = levels[0];
+          map.initialize();
           map.createLevelMenu(levels.reverse());
           return map.loadFloorByLevel(lev);
         };
@@ -74,7 +75,7 @@ setTimeout(function() {
 beaconId = 300;
 
 setTimeout(function() {
-  map.loadFloorAndchangeShelfColor('3F', 298);
+  map.loadFloorAndChangeShelfColor('3F', 298);
   map.createUserLocation(298, 'marker');
   map.createDestLocation(298, 'destination-infowindow');
   time = 0;

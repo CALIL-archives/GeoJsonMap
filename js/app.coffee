@@ -26,6 +26,7 @@ app =
         for level, geojson of data.geojson
           levels.push(level)
         lev = levels[0]
+        map.initialize()
         map.createLevelMenu(levels.reverse())
         # TODO: いまいる階を指定する
         map.loadFloorByLevel(lev)
@@ -58,7 +59,7 @@ setTimeout ->
 # 3Fへ移動
 beaconId = 300
 setTimeout ->
-  map.loadFloorAndchangeShelfColor('3F', 298)
+  map.loadFloorAndChangeShelfColor('3F', 298)
   map.createUserLocation(298, 'marker')
   map.createDestLocation(298, 'destination-infowindow')
 

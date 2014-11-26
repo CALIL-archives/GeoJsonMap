@@ -12,52 +12,80 @@ map = {
   userLocation: null,
   destLocation: null,
   geosjon: null,
-  createMap: function(divId) {
+  initDeferred: new $.Deferred,
+  initialize: function(divId, zoom) {
+    var options;
     if (divId == null) {
-      divId = 'map';
+      divId = 'map-canvas';
     }
-    return this.googleMaps = new google.maps.Map(document.getElementById(divId), {
-      disableDefaultUI: true,
-      zoom: 19,
+    if (zoom == null) {
+      zoom = 20;
+    }
+    options = {
+      zoom: zoom,
       maxZoom: 38,
-      center: {
-        lat: 0,
-        lng: 0
-      },
+      center: new google.maps.LatLng(-34.397, 150.644),
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+      disableDefaultUI: true,
       scaleControl: false
-    });
+    };
+    this.googleMaps = new google.maps.Map(document.getElementById(divId), options);
+    this.initDeferred.resolve().promise();
+  },
+  isInitialized: function() {
+    return this.googleMaps != null;
+  },
+  deferred: function(process) {
+    var d;
+    d = new $.Deferred();
+    setTimeout(function() {
+      if (typeof process === "function") {
+        process();
+      }
+      d.resolve();
+    }, 0);
+    return d.promise();
   },
   loadFloorByLevel: function(level) {
-    var dfd;
-    dfd = $.Deferred();
-    dfd.then(function() {
-      $('#map-level li').css({
-        'color': '#000000',
-        'background-color': '#FFFFFF'
-      });
-      return $('#map-level li[level="' + level + '"]').css({
-        'color': '#FFFFFF',
-        'background-color': '#00BFFF'
-      });
-    }).then((function(_this) {
+    var dfd, func, start_time;
+    start_time = new Date();
+    dfd = new $.Deferred();
+    log(level);
+    func = (function(_this) {
       return function() {
-        var latlng;
-        if (!_this.googleMaps) {
-          _this.createMap();
-        }
-        _this.userLocation = _this.removeMarker(_this.userLocation);
-        _this.destLocation = _this.removeMarker(_this.destLocation);
-        _this.geojson = app.getGeoJSONByLevel(level);
-        _this.googleMaps.data.forEach(function(feature) {
-          return _this.googleMaps.data.remove(feature);
+        var geoJsonWithoutBeacon;
+        geoJsonWithoutBeacon = null;
+        $.when(_this.deferred(function() {
+          $('#map-level > li').css({
+            'color': '#000000',
+            'background-color': '#FFFFFF'
+          });
+          return $("#map-level > li[level='" + level + "']").css({
+            'color': '#FFFFFF',
+            'background-color': '#00BFFF'
+          });
+        }), _this.deferred(function() {
+          _this.removeUserLocation();
+          return _this.googleMaps.data.forEach(function(feature) {
+            return _this.googleMaps.data.remove(feature);
+          });
+        }), _this.deferred(function() {
+          _this.geojson = app.getGeoJSONByLevel(level);
+          return geoJsonWithoutBeacon = _this.removeBeaconFromGeoJSON(_this.geojson);
+        })).done(function() {
+          _this.googleMaps.setCenter(new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude));
+          _this.googleMaps.data.addGeoJson(geoJsonWithoutBeacon);
+          _this.applyStyle();
+          dfd.resolve();
         });
-        latlng = new google.maps.LatLng(_this.geojson.haika.xyLatitude, _this.geojson.haika.xyLongitude);
-        _this.googleMaps.setCenter(latlng);
-        _this.googleMaps.data.addGeoJson(_this.removeBeaconFromGeoJSON(_this.geojson));
-        return _this.drawGeoJSON();
       };
-    })(this));
-    return dfd.resolve();
+    })(this);
+    if (this.isInitialized()) {
+      func();
+    } else {
+      this.initDeferred.done(func);
+    }
+    return dfd.promise();
   },
   removeBeaconFromGeoJSON: function(geojson) {
     var feature, newGeoJSON, _i, _len, _ref;
@@ -74,63 +102,60 @@ map = {
     }
     return newGeoJSON;
   },
-  drawGeoJSON: function(shelfId) {
+  loadFloorAndChangeShelfColor: function(level, shelfId) {
+    return this.loadFloorByLevel(level).done((function(_this) {
+      return function() {
+        return _this.changeShelfColor(shelfId);
+      };
+    })(this));
+  },
+  changeShelfColor: function(shelfId) {
+    return this.applyStyle(shelfId);
+  },
+  applyStyle: function(shelfId) {
     if (shelfId == null) {
       shelfId = 0;
     }
     this.googleMaps.data.revertStyle();
     return this.googleMaps.data.setStyle((function(_this) {
       return function(feature) {
-        return _this.applyStyle(feature, shelfId);
+        var id, type;
+        type = feature.getProperty("type");
+        id = feature.getProperty("id");
+        if (type === 'floor') {
+          return {
+            fillColor: "#ffffff",
+            fillOpacity: 0.5,
+            strokeWeight: 0,
+            zIndex: -1
+          };
+        }
+        if (type === 'wall') {
+          return {
+            fillColor: "#555555",
+            fillOpacity: 1,
+            strokeWeight: 2,
+            strokeColor: "#555555",
+            strokeOpacity: 1
+          };
+        }
+        if (type === 'shelf') {
+          if (id === shelfId) {
+            return {
+              fillColor: "#FE0703",
+              fillOpacity: 1,
+              strokeWeight: 1
+            };
+          } else {
+            return {
+              fillColor: "#CEE1F2",
+              fillOpacity: 1,
+              strokeWeight: 1
+            };
+          }
+        }
       };
     })(this));
-  },
-  changeShelfColor: function(shelfId) {
-    return this.drawGeoJSON(shelfId);
-  },
-  applyStyle: function(feature, shelfId) {
-    var id, type;
-    if (shelfId == null) {
-      shelfId = 0;
-    }
-    id = feature.getProperty("id");
-    type = feature.getProperty("type");
-    if (type === 'floor') {
-      return {
-        fillColor: "#ffffff",
-        fillOpacity: 0.5,
-        strokeWeight: 0,
-        zIndex: -1
-      };
-    }
-    if (type === 'wall') {
-      return {
-        fillColor: "#555555",
-        fillOpacity: 1,
-        strokeWeight: 2,
-        strokeColor: "#555555",
-        strokeOpacity: 1
-      };
-    }
-    if (type === 'shelf') {
-      if (id === shelfId) {
-        return {
-          fillColor: "#FE0703",
-          fillOpacity: 1,
-          strokeWeight: 1
-        };
-      } else {
-        return {
-          fillColor: "#CEE1F2",
-          fillOpacity: 1,
-          strokeWeight: 1
-        };
-      }
-    }
-  },
-  loadFloorAndchangeShelfColor: function(level, shelfId) {
-    this.loadFloorByLevel(level);
-    return this.changeShelfColor(shelfId);
   },
   getObjectCenterLatLng: function(objectId) {
     var coordinate, count, feature, lat, lng, _i, _j, _len, _len1, _ref, _ref1;
@@ -294,5 +319,5 @@ map = {
 };
 
 /*
-//@ sourceMappingURL=appMap.map
+//@ sourceMappingURL=googlemap.map
 */
