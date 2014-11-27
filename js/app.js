@@ -62,11 +62,29 @@ time = 0;
 beaconId = 300;
 
 setTimeout(function() {
-  map.loadFloorAndChangeShelfColor('3F', 298).then(function() {
-    map.createUserLocation(298, 'marker');
-    return map.createDestLocation(298, 'destination-infowindow');
-  });
+  map.loadFloorAndChangeShelfColor('3F', 298);
+  map.createUserLocation(298, 'marker');
+  map.createDestLocation(298, 'destination-infowindow');
   return time = 0;
+}, time += 2000);
+
+setTimeout(function() {
+  map.createUserLocation(298, 'marker');
+  return map.createDestLocation(298, 'destination-infowindow');
+}, time += 2000);
+
+setTimeout(function() {
+  map.createUserLocation(298, 'marker');
+  return map.createDestLocation(298, 'destination-infowindow');
+}, time += 2000);
+
+setTimeout(function() {
+  map.createUserLocation(298, 'marker');
+  return map.createDestLocation(298, 'destination-infowindow');
+}, time += 2000);
+
+setTimeout(function() {
+  return setLocation();
 }, time += 2000);
 
 setLocation = function() {

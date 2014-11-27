@@ -144,9 +144,15 @@ map =
       return null
     else
       return {'lat': lat/count, 'lng': lng/count}
+  beforeBeaconId : 0
   # 指定した場所に現在地アイコンを表示
   # 現在地を描画(minor)
   createUserLocation: (beaconId, markerType='marker')->
+    # 同じ場所を連続して描くのを防ぐ
+    if @userLocation and @beforeBeaconId==beaconId
+      return
+    else
+      @beforeBeaconId=beaconId
     if @userLocation
       objectCenter = @getObjectCenterLatLng(beaconId)
       if not objectCenter
@@ -159,9 +165,15 @@ map =
     if @userLocation
       @userLocation.setMap(@googleMaps)
  
+  beforeShelfId : 0
   # 指定した棚に目的地アイコンを表示
   # 目的地を描画(minor)
   createDestLocation: (shelfId, markerType='destination')->
+    # 同じ場所を連続して描くのを防ぐ
+    if @destLocation and @beforeShelfId==shelfId
+      return
+    else
+      @beforeShelfId=shelfId
     @destLocation = @removeMarker(@destLocation)
     @destLocation = @createMarker(shelfId, markerType)
     if @destLocation

@@ -179,10 +179,16 @@ map = {
       };
     }
   },
+  beforeBeaconId: 0,
   createUserLocation: function(beaconId, markerType) {
     var objectCenter;
     if (markerType == null) {
       markerType = 'marker';
+    }
+    if (this.userLocation && this.beforeBeaconId === beaconId) {
+      return;
+    } else {
+      this.beforeBeaconId = beaconId;
     }
     if (this.userLocation) {
       objectCenter = this.getObjectCenterLatLng(beaconId);
@@ -198,9 +204,15 @@ map = {
       return this.userLocation.setMap(this.googleMaps);
     }
   },
+  beforeShelfId: 0,
   createDestLocation: function(shelfId, markerType) {
     if (markerType == null) {
       markerType = 'destination';
+    }
+    if (this.destLocation && this.beforeShelfId === shelfId) {
+      return;
+    } else {
+      this.beforeShelfId = shelfId;
     }
     this.destLocation = this.removeMarker(this.destLocation);
     this.destLocation = this.createMarker(shelfId, markerType);
