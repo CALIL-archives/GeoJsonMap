@@ -13,7 +13,7 @@ map =
   geosjon: null
   initDeferred: new $.Deferred
   createMap: (divId='map-canvas', zoom=20)->
-    if @googleMaps?
+    if @googleMaps
       return
     options = {
       zoom: zoom
@@ -49,6 +49,8 @@ map =
         $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
       ),@deferred(=>
         # 古いマップの削除
+        @beforeBeaconId = 0
+        @beforeShelfId = 0
         @userLocation = @removeMarker(@userLocation)
         @destLocation = @removeMarker(@destLocation)
         @googleMaps.data.forEach (feature)=>
@@ -168,7 +170,7 @@ map =
   beforeShelfId : 0
   # 指定した棚に目的地アイコンを表示
   # 目的地を描画(minor)
-  createDestLocation: (shelfId, markerType='destination')->
+  createDestLocation: (shelfId, markerType='destination-infowindow')->
     # 同じ場所を連続して描くのを防ぐ
     if @destLocation and @beforeShelfId==shelfId
       return

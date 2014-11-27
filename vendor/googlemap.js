@@ -21,7 +21,7 @@ map = {
     if (zoom == null) {
       zoom = 20;
     }
-    if (this.googleMaps != null) {
+    if (this.googleMaps) {
       return;
     }
     options = {
@@ -67,6 +67,8 @@ map = {
       };
     })(this)), this.deferred((function(_this) {
       return function() {
+        _this.beforeBeaconId = 0;
+        _this.beforeShelfId = 0;
         _this.userLocation = _this.removeMarker(_this.userLocation);
         _this.destLocation = _this.removeMarker(_this.destLocation);
         return _this.googleMaps.data.forEach(function(feature) {
@@ -207,7 +209,7 @@ map = {
   beforeShelfId: 0,
   createDestLocation: function(shelfId, markerType) {
     if (markerType == null) {
-      markerType = 'destination';
+      markerType = 'destination-infowindow';
     }
     if (this.destLocation && this.beforeShelfId === shelfId) {
       return;
