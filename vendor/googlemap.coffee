@@ -85,6 +85,7 @@ map =
 
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
+    @createDestLocation(shelfId, 'destination-infowindow')
     @applyStyle(shelfId)
 
   # スタイルを適用する
