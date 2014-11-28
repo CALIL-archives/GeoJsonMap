@@ -107,6 +107,7 @@ map = {
     return this.loadFloorByLevel(level, shelfId);
   },
   changeShelfColor: function(shelfId) {
+    this.createDestLocation(shelfId, 'destination-infowindow');
     return this.applyStyle(shelfId);
   },
   applyStyle: function(shelfId) {
