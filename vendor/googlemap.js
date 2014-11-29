@@ -51,13 +51,13 @@ map = {
     }, 0);
     return d.promise();
   },
-  loadFloorByLevel: function(level, shelfId, beaconId) {
+  loadFloorByLevel: function(level, shelfId, minor) {
     var geoJsonWithoutBeacon, start_time;
     if (shelfId == null) {
       shelfId = 0;
     }
-    if (beaconId == null) {
-      beaconId = 0;
+    if (minor == null) {
+      minor = 0;
     }
     start_time = new Date();
     this.createMap();
@@ -75,7 +75,7 @@ map = {
       };
     })(this)), this.deferred((function(_this) {
       return function() {
-        _this.beforeBeaconId = 0;
+        _this.beforeminor = 0;
         _this.beforeShelfId = 0;
         _this.userLocation = _this.removeMarker(_this.userLocation);
         _this.destLocation = _this.removeMarker(_this.destLocation);
@@ -115,10 +115,10 @@ map = {
     }
     return newGeoJSON;
   },
-  loadFloorAndChangeShelfColorAndShowDestination: function(level, shelfId, BeaconId) {
+  loadFloorAndChangeShelfColor: function(level, shelfId) {
     return this.loadFloorByLevel(level, shelfId).then((function(_this) {
       return function() {
-        return _this.createDestLocation(BeaconId, 'destination-infowindow');
+        return _this.createDestLocation(shelfId, 'destination-infowindow');
       };
     })(this));
   },
@@ -171,15 +171,21 @@ map = {
       };
     })(this));
   },
-  getObjectCenterLatLng: function(objectId) {
-    var coordinate, count, feature, lat, lng, _i, _j, _len, _len1, _ref, _ref1;
+  getObjectCenterLatLng: function(objectType, objectId) {
+    var coordinate, count, feature, lat, lng, matchCase, _i, _j, _len, _len1, _ref, _ref1;
     lat = 0;
     lng = 0;
     count = 0;
+    if (objectType === 'beacon') {
+      matchCase = 'minor';
+    }
+    if (objectType === 'shelf') {
+      matchCase = 'id';
+    }
     _ref = this.geojson.features;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       feature = _ref[_i];
-      if (feature.properties.minor === objectId) {
+      if (feature.properties[matchCase] === objectId) {
         count = feature.geometry.coordinates[0].length;
         _ref1 = feature.geometry.coordinates[0];
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
@@ -198,26 +204,26 @@ map = {
       };
     }
   },
-  beforeBeaconId: 0,
-  createUserLocation: function(beaconId, markerType) {
+  beforeminor: 0,
+  createUserLocation: function(minor, markerType) {
     var objectCenter;
     if (markerType == null) {
       markerType = 'marker';
     }
-    if (this.userLocation && this.beforeBeaconId === beaconId) {
+    if (this.userLocation && this.beforeminor === minor) {
       return;
     } else {
-      this.beforeBeaconId = beaconId;
+      this.beforeminor = minor;
     }
     if (this.userLocation) {
-      objectCenter = this.getObjectCenterLatLng(beaconId);
+      objectCenter = this.getObjectCenterLatLng('beacon', minor);
       if (!objectCenter) {
         this.userLocation = this.removeMarker(this.userLocation);
         return;
       }
       this.animateMarker([objectCenter.lat, objectCenter.lng]);
     } else {
-      this.userLocation = this.createMarker(beaconId, markerType);
+      this.userLocation = this.createMarker(minor, markerType);
     }
     if (this.userLocation) {
       return this.userLocation.setMap(this.googleMaps);
@@ -266,8 +272,14 @@ map = {
     }
   },
   createMarker: function(objectId, markerType) {
-    var marker, objectCenter, position;
-    objectCenter = this.getObjectCenterLatLng(objectId);
+    var marker, objectCenter, objectType, position;
+    if (markerType.match('marker')) {
+      objectType = 'beacon';
+    }
+    if (markerType.match('destination')) {
+      objectType = 'shelf';
+    }
+    objectCenter = this.getObjectCenterLatLng(objectType, objectId);
     if (!objectCenter) {
       return null;
     }

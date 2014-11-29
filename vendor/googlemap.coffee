@@ -41,7 +41,7 @@ map =
     return d.promise()
 
   # フロア切り替え
-  loadFloorByLevel: (level, shelfId=0, beaconId=0)->
+  loadFloorByLevel: (level, shelfId=0, minor=0)->
     start_time = new Date()
     @createMap()
     geoJsonWithoutBeacon = null
@@ -52,7 +52,7 @@ map =
         $("#map-level > li[level='#{level}']").css({'color': '#FFFFFF', 'background-color': '#00BFFF'})
       ),@deferred(=>
         # 古いマップの削除
-        @beforeBeaconId = 0
+        @beforeminor = 0
         @beforeShelfId = 0
         @userLocation = @removeMarker(@userLocation)
         @destLocation = @removeMarker(@destLocation)
@@ -85,16 +85,17 @@ map =
         newGeoJSON.features.push(feature)
     return newGeoJSON
   
-  # フロアと棚の色を変えて目的地を表示する (フロア番号・棚ID・ビーコンID)
-  loadFloorAndChangeShelfColorAndShowDestination: (level, shelfId, BeaconId)->
+  # フロアと棚の色を変える (フロア番号・棚ID)
+  loadFloorAndChangeShelfColor: (level, shelfId)->
     @loadFloorByLevel(level, shelfId).then(=>
-      @createDestLocation(BeaconId, 'destination-infowindow')                                      
+      @createDestLocation(shelfId, 'destination-infowindow')                                      
     )
 
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
     @createDestLocation(shelfId, 'destination-infowindow')
     @applyStyle(shelfId)
+
 
   # スタイルを適用する
   applyStyle : (shelfId=0)->
@@ -140,13 +141,16 @@ map =
   #      }
 
   # オブジェクトの中心点を求める
-  getObjectCenterLatLng: (objectId)->
+  getObjectCenterLatLng: (objectType, objectId)->
     lat = 0
     lng = 0
     count = 0
+    if objectType=='beacon'
+      matchCase = 'minor'
+    if objectType=='shelf'
+      matchCase = 'id'
     for feature in @geojson.features
-#      if feature.properties.type=='beacon'
-      if feature.properties.minor==objectId
+      if feature.properties[matchCase]==objectId
         count = feature.geometry.coordinates[0].length
         for coordinate in feature.geometry.coordinates[0]
           lat += coordinate[1]
@@ -155,24 +159,24 @@ map =
       return null
     else
       return {'lat': lat/count, 'lng': lng/count}
-  beforeBeaconId : 0
+  beforeminor : 0
   # 指定した場所に現在地アイコンを表示
   # 現在地を描画(minor)
-  createUserLocation: (beaconId, markerType='marker')->
+  createUserLocation: (minor, markerType='marker')->
     # 同じ場所を連続して描くのを防ぐ
-    if @userLocation and @beforeBeaconId==beaconId
+    if @userLocation and @beforeminor==minor
       return
     else
-      @beforeBeaconId=beaconId
+      @beforeminor=minor
     if @userLocation
-      objectCenter = @getObjectCenterLatLng(beaconId)
+      objectCenter = @getObjectCenterLatLng('beacon', minor)
       if not objectCenter
         # マーカーの削除
         @userLocation = @removeMarker(@userLocation)
         return
       @animateMarker([objectCenter.lat, objectCenter.lng])
     else
-      @userLocation = @createMarker(beaconId, markerType)
+      @userLocation = @createMarker(minor, markerType)
     if @userLocation
       @userLocation.setMap(@googleMaps)
  
@@ -222,7 +226,11 @@ map =
 
   # マーカーの作成
   createMarker: (objectId, markerType)->
-    objectCenter = @getObjectCenterLatLng(objectId)
+    if markerType.match('marker')
+      objectType = 'beacon'
+    if markerType.match('destination')
+      objectType = 'shelf'
+    objectCenter = @getObjectCenterLatLng(objectType, objectId)
     if not objectCenter
       return null
     position = new google.maps.LatLng(objectCenter.lat, objectCenter.lng)

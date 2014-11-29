@@ -58,38 +58,38 @@ time = 0
 # 3Fへ移動
 minor = 300
 setTimeout ->
-  map.loadFloorAndChangeShelfColorAndShowDestination('3F', 298, 72)
+  map.loadFloorAndChangeShelfColor('3F', 298)
   map.createUserLocation(72, 'marker')
   map.createDestLocation(72, 'destination-infowindow')
 
   time = 0
 ,time+=2000
-setTimeout ->
-  map.createUserLocation(72, 'marker')
-  map.createDestLocation(72, 'destination-infowindow')
-,time+=2000
-setTimeout ->
-  map.createUserLocation(72, 'marker')
-  map.createDestLocation(72, 'destination-infowindow')
-,time+=2000
-setTimeout ->
-  map.createUserLocation(72, 'marker-infowindow')
-  map.createDestLocation(72, 'destination')
-,time+=2000
-setTimeout ->
-  setLocation()
-,time+=2000
-  
-# 現在地の移動
-setLocation = ()->
-  setTimeout ->
-    minor += 10
-    map.createUserLocation(minor, 'marker')
-    map.createDestLocation(minor-100, 'destination-infowindow')
-    map.changeShelfColor(minor-100)
-    if minor<385
-      setLocation()
-  , time+=1000
-
-
+#setTimeout ->
+#  map.createUserLocation(72, 'marker')
+#  map.createDestLocation(72, 'destination-infowindow')
+#,time+=2000
+#setTimeout ->
+#  map.createUserLocation(72, 'marker')
+#  map.createDestLocation(72, 'destination-infowindow')
+#,time+=2000
+#setTimeout ->
+#  map.createUserLocation(72, 'marker-infowindow')
+#  map.createDestLocation(72, 'destination')
+#,time+=2000
+#setTimeout ->
+#  setLocation()
+#,time+=2000
+#  
+## 現在地の移動
+#setLocation = ()->
+#  setTimeout ->
+#    minor += 10
+#    map.createUserLocation(minor, 'marker')
+#    map.createDestLocation(minor-100, 'destination-infowindow')
+#    map.changeShelfColor(minor-100)
+#    if minor<385
+#      setLocation()
+#  , time+=1000
+#
+#
 
