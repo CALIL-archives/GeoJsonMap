@@ -14,7 +14,7 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  createMap: (divId='map-canvas', zoom=20, showBeacon=true)->
+  createMap: (divId='map-canvas', zoom=20, showBeacon=false)->
     @showBeacon = showBeacon
     if @googleMaps
       return

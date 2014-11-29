@@ -23,7 +23,7 @@ map = {
       zoom = 20;
     }
     if (showBeacon == null) {
-      showBeacon = true;
+      showBeacon = false;
     }
     this.showBeacon = showBeacon;
     if (this.googleMaps) {
