@@ -14,7 +14,7 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  createMap: (divId='map-canvas', zoom=20, showBeacon=false)->
+  createMap: (divId='map-canvas', zoom=20, showBeacon=true)->
     @showBeacon = showBeacon
     if @googleMaps
       return
@@ -151,10 +151,14 @@ map =
       matchCase = 'id'
     for feature in @geojson.features
       if feature.properties[matchCase]==objectId
-        count = feature.geometry.coordinates[0].length
+        count = feature.geometry.coordinates[0].length-1
+        i = 1
         for coordinate in feature.geometry.coordinates[0]
+          if i==5
+            break
           lat += coordinate[1]
           lng += coordinate[0]
+          i += 1
     if lat==0 and lng==0
       return null
     else
@@ -208,12 +212,12 @@ map =
     new google.maps.MarkerImage('img/destination.png',
         new google.maps.Size(23, 30),
         new google.maps.Point(0, 0),
-        new google.maps.Point(14, 25))
+        new google.maps.Point(11, 25))
   iconDestWindow : ->
     new google.maps.MarkerImage('img/destination-infowindow.png',
         new google.maps.Size(74, 85),
         new google.maps.Point(0, 0),
-        new google.maps.Point(41, 80))
+        new google.maps.Point(38, 85))
   getIcon : (markerType)->
     if markerType=='marker'
       return @iconMarker()

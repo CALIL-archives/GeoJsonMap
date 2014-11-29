@@ -23,7 +23,7 @@ map = {
       zoom = 20;
     }
     if (showBeacon == null) {
-      showBeacon = false;
+      showBeacon = true;
     }
     this.showBeacon = showBeacon;
     if (this.googleMaps) {
@@ -172,7 +172,7 @@ map = {
     })(this));
   },
   getObjectCenterLatLng: function(objectType, objectId) {
-    var coordinate, count, feature, lat, lng, matchCase, _i, _j, _len, _len1, _ref, _ref1;
+    var coordinate, count, feature, i, lat, lng, matchCase, _i, _j, _len, _len1, _ref, _ref1;
     lat = 0;
     lng = 0;
     count = 0;
@@ -186,12 +186,17 @@ map = {
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       feature = _ref[_i];
       if (feature.properties[matchCase] === objectId) {
-        count = feature.geometry.coordinates[0].length;
+        count = feature.geometry.coordinates[0].length - 1;
+        i = 1;
         _ref1 = feature.geometry.coordinates[0];
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
           coordinate = _ref1[_j];
+          if (i === 5) {
+            break;
+          }
           lat += coordinate[1];
           lng += coordinate[0];
+          i += 1;
         }
       }
     }
@@ -252,10 +257,10 @@ map = {
     return new google.maps.MarkerImage('img/marker-infowindow.png', new google.maps.Size(73, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 68));
   },
   iconDest: function() {
-    return new google.maps.MarkerImage('img/destination.png', new google.maps.Size(23, 30), new google.maps.Point(0, 0), new google.maps.Point(14, 25));
+    return new google.maps.MarkerImage('img/destination.png', new google.maps.Size(23, 30), new google.maps.Point(0, 0), new google.maps.Point(11, 25));
   },
   iconDestWindow: function() {
-    return new google.maps.MarkerImage('img/destination-infowindow.png', new google.maps.Size(74, 85), new google.maps.Point(0, 0), new google.maps.Point(41, 80));
+    return new google.maps.MarkerImage('img/destination-infowindow.png', new google.maps.Size(74, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 85));
   },
   getIcon: function(markerType) {
     if (markerType === 'marker') {
