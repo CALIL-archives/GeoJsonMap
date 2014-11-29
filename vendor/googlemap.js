@@ -23,7 +23,7 @@ map = {
       zoom = 20;
     }
     if (showBeacon == null) {
-      showBeacon = true;
+      showBeacon = false;
     }
     this.showBeacon = showBeacon;
     if (this.googleMaps) {
@@ -51,10 +51,13 @@ map = {
     }, 0);
     return d.promise();
   },
-  loadFloorByLevel: function(level, shelfId) {
+  loadFloorByLevel: function(level, shelfId, beaconId) {
     var geoJsonWithoutBeacon, start_time;
     if (shelfId == null) {
       shelfId = 0;
+    }
+    if (beaconId == null) {
+      beaconId = 0;
     }
     start_time = new Date();
     this.createMap();
@@ -112,8 +115,12 @@ map = {
     }
     return newGeoJSON;
   },
-  loadFloorAndChangeShelfColor: function(level, shelfId) {
-    return this.loadFloorByLevel(level, shelfId);
+  loadFloorAndChangeShelfColorAndShowDestination: function(level, shelfId, BeaconId) {
+    return this.loadFloorByLevel(level, shelfId).then((function(_this) {
+      return function() {
+        return _this.createDestLocation(BeaconId, 'destination-infowindow');
+      };
+    })(this));
   },
   changeShelfColor: function(shelfId) {
     this.createDestLocation(shelfId, 'destination-infowindow');

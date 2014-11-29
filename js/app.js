@@ -62,25 +62,25 @@ time = 0;
 beaconId = 300;
 
 setTimeout(function() {
-  map.loadFloorAndChangeShelfColor('3F', 298);
-  map.createUserLocation(298, 'marker');
-  map.createDestLocation(298, 'destination-infowindow');
+  map.loadFloorAndChangeShelfColorAndShowDestination('3F', 298, 72);
+  map.createUserLocation(72, 'marker');
+  map.createDestLocation(72, 'destination-infowindow');
   return time = 0;
 }, time += 2000);
 
 setTimeout(function() {
-  map.createUserLocation(55, 'marker');
-  return map.createDestLocation(298, 'destination-infowindow');
+  map.createUserLocation(72, 'marker');
+  return map.createDestLocation(72, 'destination-infowindow');
 }, time += 2000);
 
 setTimeout(function() {
   map.createUserLocation(72, 'marker');
-  return map.createDestLocation(298, 'destination-infowindow');
+  return map.createDestLocation(72, 'destination-infowindow');
 }, time += 2000);
 
 setTimeout(function() {
-  map.createUserLocation(38, 'marker-infowindow');
-  return map.createDestLocation(298, 'destination');
+  map.createUserLocation(72, 'marker-infowindow');
+  return map.createDestLocation(72, 'destination');
 }, time += 2000);
 
 setTimeout(function() {
@@ -91,6 +91,7 @@ setLocation = function() {
   return setTimeout(function() {
     beaconId += 10;
     map.createUserLocation(beaconId, 'marker');
+    map.createDestLocation(beaconId - 100, 'destination-infowindow');
     map.changeShelfColor(beaconId - 100);
     if (beaconId < 385) {
       return setLocation();

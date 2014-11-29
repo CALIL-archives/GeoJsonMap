@@ -14,7 +14,7 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  createMap: (divId='map-canvas', zoom=20, showBeacon=true)->
+  createMap: (divId='map-canvas', zoom=20, showBeacon=false)->
     @showBeacon = showBeacon
     if @googleMaps
       return
@@ -41,7 +41,7 @@ map =
     return d.promise()
 
   # フロア切り替え
-  loadFloorByLevel: (level, shelfId=0)->
+  loadFloorByLevel: (level, shelfId=0, beaconId=0)->
     start_time = new Date()
     @createMap()
     geoJsonWithoutBeacon = null
@@ -85,9 +85,11 @@ map =
         newGeoJSON.features.push(feature)
     return newGeoJSON
   
-  # フロアと棚の色を変える (フロア番号・棚ID)
-  loadFloorAndChangeShelfColor: (level, shelfId)->
-    @loadFloorByLevel(level, shelfId)
+  # フロアと棚の色を変えて目的地を表示する (フロア番号・棚ID・ビーコンID)
+  loadFloorAndChangeShelfColorAndShowDestination: (level, shelfId, BeaconId)->
+    @loadFloorByLevel(level, shelfId).then(=>
+      @createDestLocation(BeaconId, 'destination-infowindow')                                      
+    )
 
   # 棚の色を変える (棚ID)
   changeShelfColor: (shelfId)->
