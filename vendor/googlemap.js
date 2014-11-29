@@ -327,9 +327,9 @@ map = {
     this.animateLatLng = this.startLatLng;
     this.animationLat = (goLatLng[0] - this.startLatLng[0]) / this.drawingNumber;
     this.animationLng = (goLatLng[1] - this.startLatLng[1]) / this.drawingNumber;
-    return this.moveMarker();
+    return this.moveMarker(goLatLng);
   },
-  moveMarker: function() {
+  moveMarker: function(goLatLng) {
     if (!this.userLocation) {
       return;
     }
@@ -337,12 +337,13 @@ map = {
     this.animateLatLng[1] += this.animationLng;
     this.userLocation.setPosition(new google.maps.LatLng(this.animateLatLng[0], this.animateLatLng[1]));
     if (this.animationCounter === this.drawingNumber) {
+      this.userLocation.setPosition(new google.maps.LatLng(goLatLng[0], goLatLng[1]));
       return this.changeMarkerIcon(this.userLocation, 'marker-infowindow');
     } else {
       this.animationCounter++;
       return setTimeout((function(_this) {
         return function() {
-          return _this.moveMarker();
+          return _this.moveMarker(goLatLng);
         };
       })(this), this.animationFrameTime);
     }

@@ -62,9 +62,11 @@ time = 0;
 minor = 300;
 
 setTimeout(function() {
-  map.loadFloorAndChangeShelfColor('3F', 298);
-  map.createUserLocation(72, 'marker');
-  map.createDestLocation(72, 'destination-infowindow');
+  map.loadFloorAndChangeShelfColor('3F', 298).then((function(_this) {
+    return function() {
+      return map.createUserLocation(72, 'marker-infowindow');
+    };
+  })(this));
   return time = 0;
 }, time += 2000);
 

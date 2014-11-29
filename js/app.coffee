@@ -58,9 +58,10 @@ time = 0
 # 3Fへ移動
 minor = 300
 setTimeout ->
-  map.loadFloorAndChangeShelfColor('3F', 298)
-  map.createUserLocation(72, 'marker')
-  map.createDestLocation(72, 'destination-infowindow')
+  map.loadFloorAndChangeShelfColor('3F', 298).then(=>
+    map.createUserLocation(72, 'marker-infowindow')
+#    map.createDestLocation(310, 'destination-infowindow')
+  )
 
   time = 0
 ,time+=2000

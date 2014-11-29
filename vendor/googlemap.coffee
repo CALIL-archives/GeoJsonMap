@@ -280,21 +280,22 @@ map =
     # 1コマあたりの移動距離を求める
     @animationLat = (goLatLng[0] - @startLatLng[0]) / @drawingNumber
     @animationLng = (goLatLng[1] - @startLatLng[1]) / @drawingNumber
-    @moveMarker()
+    @moveMarker(goLatLng)
 
-  moveMarker : ->
+  moveMarker : (goLatLng)->
     if not @userLocation
       return
     @animateLatLng[0] += @animationLat
     @animateLatLng[1] += @animationLng
     @userLocation.setPosition new google.maps.LatLng(@animateLatLng[0], @animateLatLng[1])
     if @animationCounter==@drawingNumber
+      @userLocation.setPosition new google.maps.LatLng(goLatLng[0], goLatLng[1])
       # マーカーの吹き出しを出す
       @changeMarkerIcon(@userLocation, 'marker-infowindow')
     else
       @animationCounter++
       setTimeout( =>
-        @moveMarker()
+        @moveMarker(goLatLng)
       , @animationFrameTime)
 
   
