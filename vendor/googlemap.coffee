@@ -14,7 +14,7 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  createMap: (divId='map-canvas', zoom=20, showBeacon=false)->
+  createMap: (divId='map-canvas', zoom=20, showBeacon=true)->
     @showBeacon = showBeacon
     if @googleMaps
       return
@@ -144,7 +144,7 @@ map =
     count = 0
     for feature in @geojson.features
 #      if feature.properties.type=='beacon'
-      if feature.properties.id==objectId
+      if feature.properties.minor==objectId
         count = feature.geometry.coordinates[0].length
         for coordinate in feature.geometry.coordinates[0]
           lat += coordinate[1]

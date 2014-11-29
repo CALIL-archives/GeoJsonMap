@@ -23,7 +23,7 @@ map = {
       zoom = 20;
     }
     if (showBeacon == null) {
-      showBeacon = false;
+      showBeacon = true;
     }
     this.showBeacon = showBeacon;
     if (this.googleMaps) {
@@ -172,7 +172,7 @@ map = {
     _ref = this.geojson.features;
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       feature = _ref[_i];
-      if (feature.properties.id === objectId) {
+      if (feature.properties.minor === objectId) {
         count = feature.geometry.coordinates[0].length;
         _ref1 = feature.geometry.coordinates[0];
         for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {

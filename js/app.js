@@ -69,17 +69,17 @@ setTimeout(function() {
 }, time += 2000);
 
 setTimeout(function() {
-  map.createUserLocation(298, 'marker');
+  map.createUserLocation(55, 'marker');
   return map.createDestLocation(298, 'destination-infowindow');
 }, time += 2000);
 
 setTimeout(function() {
-  map.createUserLocation(298, 'marker');
+  map.createUserLocation(72, 'marker');
   return map.createDestLocation(298, 'destination-infowindow');
 }, time += 2000);
 
 setTimeout(function() {
-  map.createUserLocation(298, 'marker-infowindow');
+  map.createUserLocation(38, 'marker-infowindow');
   return map.createDestLocation(298, 'destination');
 }, time += 2000);
 

@@ -65,15 +65,15 @@ setTimeout ->
   time = 0
 ,time+=2000
 setTimeout ->
-  map.createUserLocation(298, 'marker')
+  map.createUserLocation(55, 'marker')
   map.createDestLocation(298, 'destination-infowindow')
 ,time+=2000
 setTimeout ->
-  map.createUserLocation(298, 'marker')
+  map.createUserLocation(72, 'marker')
   map.createDestLocation(298, 'destination-infowindow')
 ,time+=2000
 setTimeout ->
-  map.createUserLocation(298, 'marker-infowindow')
+  map.createUserLocation(38, 'marker-infowindow')
   map.createDestLocation(298, 'destination')
 ,time+=2000
 setTimeout ->
