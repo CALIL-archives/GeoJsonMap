@@ -56,7 +56,7 @@ time = 0
 #,time+=2000
 
 # 3Fへ移動
-beaconId = 300
+minor = 300
 setTimeout ->
   map.loadFloorAndChangeShelfColorAndShowDestination('3F', 298, 72)
   map.createUserLocation(72, 'marker')
@@ -83,11 +83,11 @@ setTimeout ->
 # 現在地の移動
 setLocation = ()->
   setTimeout ->
-    beaconId += 10
-    map.createUserLocation(beaconId, 'marker')
-    map.createDestLocation(beaconId-100, 'destination-infowindow')
-    map.changeShelfColor(beaconId-100)
-    if beaconId<385
+    minor += 10
+    map.createUserLocation(minor, 'marker')
+    map.createDestLocation(minor-100, 'destination-infowindow')
+    map.changeShelfColor(minor-100)
+    if minor<385
       setLocation()
   , time+=1000
 
