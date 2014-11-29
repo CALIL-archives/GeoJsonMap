@@ -5,6 +5,8 @@ log = (obj)->
 map =
   # マップのオブジェクト
   googleMaps : null
+  # ビーコンを表示するか
+  showBeacon : false
   # ユーザーの現在地のオブジェクト
   userLocation: null
   # 目的地のオブジェクト
@@ -12,7 +14,8 @@ map =
   # geojsonオブジェクト
   geosjon: null
   initDeferred: new $.Deferred
-  createMap: (divId='map-canvas', zoom=20)->
+  createMap: (divId='map-canvas', zoom=20, showBeacon=false)->
+    @showBeacon = showBeacon
     if @googleMaps
       return
     options = {
@@ -58,7 +61,10 @@ map =
       ),@deferred(=>
         # 取得
         @geojson = app.getGeoJSONByLevel(level)
-        geoJsonWithoutBeacon = @removeBeaconFromGeoJSON(@geojson)
+        if @showBeacon
+          geoJsonWithoutBeacon = @geojson
+        else
+          geoJsonWithoutBeacon = @removeBeaconFromGeoJSON(@geojson)
       )
     ).done(=>
       # 新マップの描画
@@ -196,12 +202,12 @@ map =
     new google.maps.MarkerImage('img/destination.png',
         new google.maps.Size(23, 30),
         new google.maps.Point(0, 0),
-        new google.maps.Point(11, 30))
+        new google.maps.Point(14, 25))
   iconDestWindow : ->
     new google.maps.MarkerImage('img/destination-infowindow.png',
         new google.maps.Size(74, 85),
         new google.maps.Point(0, 0),
-        new google.maps.Point(38, 85))
+        new google.maps.Point(41, 80))
   getIcon : (markerType)->
     if markerType=='marker'
       return @iconMarker()

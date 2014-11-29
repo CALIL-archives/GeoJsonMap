@@ -9,11 +9,12 @@ log = function(obj) {
 
 map = {
   googleMaps: null,
+  showBeacon: false,
   userLocation: null,
   destLocation: null,
   geosjon: null,
   initDeferred: new $.Deferred,
-  createMap: function(divId, zoom) {
+  createMap: function(divId, zoom, showBeacon) {
     var options;
     if (divId == null) {
       divId = 'map-canvas';
@@ -21,6 +22,10 @@ map = {
     if (zoom == null) {
       zoom = 20;
     }
+    if (showBeacon == null) {
+      showBeacon = false;
+    }
+    this.showBeacon = showBeacon;
     if (this.googleMaps) {
       return;
     }
@@ -78,7 +83,11 @@ map = {
     })(this)), this.deferred((function(_this) {
       return function() {
         _this.geojson = app.getGeoJSONByLevel(level);
-        return geoJsonWithoutBeacon = _this.removeBeaconFromGeoJSON(_this.geojson);
+        if (_this.showBeacon) {
+          return geoJsonWithoutBeacon = _this.geojson;
+        } else {
+          return geoJsonWithoutBeacon = _this.removeBeaconFromGeoJSON(_this.geojson);
+        }
       };
     })(this))).done((function(_this) {
       return function() {
@@ -230,10 +239,10 @@ map = {
     return new google.maps.MarkerImage('img/marker-infowindow.png', new google.maps.Size(73, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 68));
   },
   iconDest: function() {
-    return new google.maps.MarkerImage('img/destination.png', new google.maps.Size(23, 30), new google.maps.Point(0, 0), new google.maps.Point(11, 30));
+    return new google.maps.MarkerImage('img/destination.png', new google.maps.Size(23, 30), new google.maps.Point(0, 0), new google.maps.Point(14, 25));
   },
   iconDestWindow: function() {
-    return new google.maps.MarkerImage('img/destination-infowindow.png', new google.maps.Size(74, 85), new google.maps.Point(0, 0), new google.maps.Point(38, 85));
+    return new google.maps.MarkerImage('img/destination-infowindow.png', new google.maps.Size(74, 85), new google.maps.Point(0, 0), new google.maps.Point(41, 80));
   },
   getIcon: function(markerType) {
     if (markerType === 'marker') {

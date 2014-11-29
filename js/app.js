@@ -91,7 +91,6 @@ setLocation = function() {
   return setTimeout(function() {
     beaconId += 10;
     map.createUserLocation(beaconId, 'marker');
-    map.createDestLocation(beaconId - 100, 'destination-infowindow');
     map.changeShelfColor(beaconId - 100);
     if (beaconId < 385) {
       return setLocation();
